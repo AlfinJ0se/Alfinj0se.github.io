@@ -6,12 +6,12 @@
     <description>Recent content on Alfins Notes</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 26 May 2024 13:07:55 +0530</lastBuildDate>
+    <lastBuildDate>Tue, 07 Mar 2017 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://Alfinj0se.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>päääd - Hack.lu CTF 2023 </title>
+      <title>Päääd - Hack.lu 2023</title>
       <link>https://Alfinj0se.github.io/posts/paaad-hackluctf2023/</link>
-      <pubDate>Sun, 26 May 2024 13:07:55 +0530</pubDate>
+      <pubDate>Tue, 07 Mar 2017 00:00:00 +0000</pubDate>
       <guid>https://Alfinj0se.github.io/posts/paaad-hackluctf2023/</guid>
       <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;meta redirect to attacker website, using the html injection in the paaad.&lt;/li&gt;&#xA;&lt;li&gt;leak the unique subdomain with csp violation.&lt;/li&gt;&#xA;&lt;li&gt;Another meta redirect csrf with the leaked subdomain to make the note public.&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
