@@ -2,31 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Alfins Notes</title>
-    <link>http://localhost:1313/</link>
+    <link>https://Alfinj0se.github.io/</link>
     <description>Recent content on Alfins Notes</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 26 May 2024 21:01:42 +0530</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://Alfinj0se.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>WaterMark as a Service AngstromCTF</title>
-      <link>http://localhost:1313/posts/angstromctf2024/</link>
+      <link>https://Alfinj0se.github.io/posts/angstromctf2024/</link>
       <pubDate>Sun, 26 May 2024 21:01:42 +0530</pubDate>
-      <guid>http://localhost:1313/posts/angstromctf2024/</guid>
+      <guid>https://Alfinj0se.github.io/posts/angstromctf2024/</guid>
       <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;XS-search 200 / 404 .&lt;/li&gt;&#xA;&lt;li&gt;Leaking using HTML injection in a same-site challenge.&lt;/li&gt;&#xA;&lt;li&gt;Link tags and Error events .&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
     </item>
     <item>
-      <title>päääd - Hack.lu CTF 2023 </title>
-      <link>http://localhost:1313/posts/paaad-hackluctf2023/</link>
-      <pubDate>Sun, 26 May 2024 13:07:55 +0530</pubDate>
-      <guid>http://localhost:1313/posts/paaad-hackluctf2023/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;meta redirect to attacker website, using the html injection in the paaad.&lt;/li&gt;&#xA;&lt;li&gt;leak the unique subdomain with csp violation.&lt;/li&gt;&#xA;&lt;li&gt;Another meta redirect csrf with the leaked subdomain to make the note public.&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-    <item>
       <title>About Me</title>
-      <link>http://localhost:1313/page/about/</link>
+      <link>https://Alfinj0se.github.io/page/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/page/about/</guid>
+      <guid>https://Alfinj0se.github.io/page/about/</guid>
       <description>Hey i am Alfin, Web security Researcher and CTF Player @bi0s .</description>
     </item>
   </channel>
