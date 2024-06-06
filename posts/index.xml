@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Alfins Notes</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 26 May 2024 21:01:42 +0530</lastBuildDate>
+    <lastBuildDate>Thu, 06 Jun 2024 21:00:26 +0530</lastBuildDate>
     <atom:link href="https://Alfinj0se.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Flag Remover - KitCTF 2024</title>
+      <link>https://Alfinj0se.github.io/posts/kitctf2024/</link>
+      <pubDate>Thu, 06 Jun 2024 21:00:26 +0530</pubDate>
+      <guid>https://Alfinj0se.github.io/posts/kitctf2024/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Dom clobbering to clobber document.body&lt;/li&gt;&#xA;&lt;li&gt;Bypassing Dompurify dom clobbering protection&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
     <item>
       <title>WaterMark as a Service AngstromCTF</title>
       <link>https://Alfinj0se.github.io/posts/angstromctf2024/</link>

