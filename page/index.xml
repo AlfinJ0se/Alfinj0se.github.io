@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Pages on Alfins Notes</title>
-    <link>http://localhost:1313/page/</link>
+    <link>https://Alfinj0se.github.io/page/</link>
     <description>Recent content in Pages on Alfins Notes</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <atom:link href="http://localhost:1313/page/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://Alfinj0se.github.io/page/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About Me</title>
-      <link>http://localhost:1313/page/about/</link>
+      <link>https://Alfinj0se.github.io/page/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/page/about/</guid>
+      <guid>https://Alfinj0se.github.io/page/about/</guid>
       <description>Hey i am Alfin, Web security Researcher and CTF Player @bi0s .</description>
     </item>
   </channel>
