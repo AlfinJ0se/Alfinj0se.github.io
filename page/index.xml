@@ -8,11 +8,11 @@
     <language>en-us</language>
     <atom:link href="https://Alfinj0se.github.io/page/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>About Me</title>
+      <title>$whoami</title>
       <link>https://Alfinj0se.github.io/page/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://Alfinj0se.github.io/page/about/</guid>
-      <description>Hey i am Alfin, Web security Researcher and CTF Player @bi0s .</description>
+      <description> Hey there 👋, Im Alfin Joseph a.k.a alfin.&#xA;I am Currently doing my undergraduate in Computer Science and Engineering from Amrita Vishwa Vidyapeetham, India 🇮🇳&#xA;My Interests 🎯 Im a Web security researcher and CTF player.&#xA;My focus has been mainly on client-side vulnerabilities.&#xA;Currently doing research and CTF&amp;rsquo;s with bi0s.&#xA;Security Advisories CVE-2023-52555 Cross-Site Request Forgery(CSRF) bug in Mongo-Express . </description>
     </item>
   </channel>
 </rss>
