@@ -1,0 +1,12 @@
+--2024-08-16 15:45:28--  https://hackmd.io/_uploads/HyPmr2DqA.png
+Loaded CA certificate '/etc/ssl/certs/ca-certificates.crt'
+Resolving hackmd.io (hackmd.io)... 2406:da14:88d:a102:c3f7:13ab:ab87:605f, 2406:da14:88d:a101:e22f:9d13:cc83:c17a, 2406:da14:88d:a100:c15b:b3fa:392d:53ad, ...
+Connecting to hackmd.io (hackmd.io)|2406:da14:88d:a102:c3f7:13ab:ab87:605f|:443... connected.
+HTTP request sent, awaiting response... 202 Accepted
+Length: 0 [text/html]
+Saving to: ‘HyPmr2DqA.png’
+
+     0K                                                        0.00 =0s
+
+2024-08-16 15:45:29 (0.00 B/s) - ‘HyPmr2DqA.png’ saved [0/0]
+

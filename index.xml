@@ -6,8 +6,15 @@
     <description>Recent content on Alfins Notes</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 04 Jul 2024 21:00:26 +0530</lastBuildDate>
+    <lastBuildDate>Thu, 15 Aug 2024 15:11:47 +0530</lastBuildDate>
     <atom:link href="https://Alfinj0se.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Intigriti 0824 XSS Challenge</title>
+      <link>https://Alfinj0se.github.io/posts/intigritixssaug2024/</link>
+      <pubDate>Thu, 15 Aug 2024 15:11:47 +0530</pubDate>
+      <guid>https://Alfinj0se.github.io/posts/intigritixssaug2024/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Bypassing CSPT filters and UUID validations implemented using Regex .&lt;/li&gt;&#xA;&lt;li&gt;Chaining CSPT and Open-Redirect to achieve XSS .&lt;/li&gt;&#xA;&lt;li&gt;Finally XSS and retrive the admin cookie .&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
     <item>
       <title>Intigriti 0724 XSS Challenge</title>
       <link>https://Alfinj0se.github.io/posts/intigritixssjuly2024/</link>
