@@ -1,0 +1,38 @@
+
+{
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+    "articles": [{"date":"2025-01-05","image":"","imageAlt":"","link":"http://example.org/posts/my-second-post/","summary":"\u003cp\u003e\u003cstrong\u003etl;dr\u003c/strong\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eBypassing CSPT filters and UUID validations implemented using Regex .\u003c/li\u003e\n\u003cli\u003eChaining CSPT and Open-Redirect to achieve XSS .\u003c/li\u003e\n\u003cli\u003eFinally XSS and retrive the admin cookie .\u003c/li\u003e\n\u003c/ul\u003e","tags":[],"title":"Intigriti 0824 XSS Challenge"},{"date":"2024-06-06","image":"","imageAlt":"","link":"http://example.org/posts/my-first-post/","summary":"\u003cp\u003e\u003cstrong\u003etl;dr\u003c/strong\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eDom clobbering to clobber isDevelopmet\u003c/li\u003e\n\u003cli\u003eThrowing an error using RPO to prevent Dompurify from loading\u003c/li\u003e\n\u003cli\u003eUsing base tag\u0026rsquo;s to import our evil.js\u003c/li\u003e\n\u003c/ul\u003e","tags":["writeups"],"title":"Intigriti 0724 XSS Challenge"},{"date":"2024-05-26","image":"","imageAlt":"","link":"http://example.org/posts/angstrom/","summary":"\u003cp\u003e\u003cstrong\u003etl;dr\u003c/strong\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eXS-search 200 / 404 .\u003c/li\u003e\n\u003cli\u003eLeaking using HTML injection in a same-site challenge.\u003c/li\u003e\n\u003cli\u003eLink tags and Error events .\u003c/li\u003e\n\u003c/ul\u003e","tags":["writeups"],"title":"WaterMark as a Service AngstromCTF"},{"date":"2024-05-26","image":"","imageAlt":"","link":"http://example.org/posts/hacklu/","summary":"\u003cp\u003e\u003cstrong\u003etl;dr\u003c/strong\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003emeta redirect to attacker website, using the html injection in the paaad.\u003c/li\u003e\n\u003cli\u003eleak the unique subdomain with csp violation.\u003c/li\u003e\n\u003cli\u003eAnother meta redirect csrf with the leaked subdomain to make the note public.\u003c/li\u003e\n\u003c/ul\u003e","tags":["writeups"],"title":"päääd - Hack.lu CTF 2023 "},{"date":"0001-01-01","image":"","imageAlt":"","link":"http://example.org/manifest/index.json","summary":"","tags":[],"title":"Manifest"}],
+    "test": "Intigriti 0824 XSS Challenge   Intigriti 0724 XSS Challenge   WaterMark as a Service AngstromCTF   päääd - Hack.lu CTF 2023    Manifest   Search   ",
+    "page": "1",
+    "next": 
+        "http://example.org/page/2/index.json"
+    
+}
+

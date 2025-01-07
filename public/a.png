@@ -1,0 +1,11 @@
+--2025-01-05 10:23:57--  https://alfinj0se.github.io/img/pfp.jpg
+Resolving alfinj0se.github.io (alfinj0se.github.io)... 2606:50c0:8002::153, 2606:50c0:8001::153, 2606:50c0:8000::153, ...
+Connecting to alfinj0se.github.io (alfinj0se.github.io)|2606:50c0:8002::153|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 21456 (21K) [image/jpeg]
+Saving to: ‘pfp.jpg’
+
+     0K .......... ..........                                 100% 5.96M=0.003s
+
+2025-01-05 10:23:57 (5.96 MB/s) - ‘pfp.jpg’ saved [21456/21456]
+
