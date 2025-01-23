@@ -16,5 +16,6 @@ I am Currently doing my undergraduate in Computer Science and Engineering from A
 - Currently doing research and CTF's with bi0s and Project Sekai.
 
 # Security Advisories 
-- [CVE-2023-52555](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)  Discoverd a Cross-Site Request Forgery(CSRF) in Mongo-Express .
-- [CVE-2025-00192](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)    Discoverd a Medium Severity XSS vulnerability in OpenUI . 
+- [CVE-2023-52555](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)  Discovered a Cross-Site Request Forgery(CSRF) in Mongo-Express .
+- [CVE-2025-00192](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)    Discovered a Medium Severity XSS vulnerability in OpenUI . 
+- [CVE-2025-00660](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)    Discovered a Stored XSS vulnerability in Concrete CMS . 
