@@ -11,7 +11,8 @@ I am Currently doing my undergraduate in Computer Science and Engineering from A
 
 # My Interests 🎯
 
-- Im a Web security researcher and CTF player.
+- Security Engineer CRED
+- Web security researcher and CTF player.
 - My focus has been mainly on client-side vulnerabilities.
 - Currently doing research and CTF's with bi0s and Project Sekai.
 

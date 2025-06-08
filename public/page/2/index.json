@@ -12,8 +12,12 @@
         
         
     
-    "articles": [{"date":"0001-01-01","image":"","imageAlt":"","link":"http://example.org/search/","summary":"","tags":[],"title":"Search"}],
-    "test": "Intigriti 0824 XSS Challenge   Intigriti 0724 XSS Challenge   WaterMark as a Service AngstromCTF   päääd - Hack.lu CTF 2023    Manifest   Search   ",
+        
+        
+        
+    
+    "articles": [{"date":"0001-01-01","image":"","imageAlt":"","link":"http://example.org/manifest/index.json","summary":"","tags":[],"title":"Manifest"},{"date":"0001-01-01","image":"","imageAlt":"","link":"http://example.org/search/","summary":"","tags":[],"title":"Search"}],
+    "test": "Intigriti 0125 XSS Challenge   Intigriti 0824 XSS Challenge   Intigriti 0724 XSS Challenge   WaterMark as a Service AngstromCTF   päääd - Hack.lu CTF 2023    Manifest   Search   ",
     "page": "2",
     "next": ""
 }

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="" lang="en-us"><head>
+    
+    <meta name="robots" content="noai, noimageai">
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+
+    <link
+    rel="icon"
+    href='/logo2.png'
+/>
+<link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+/>
+<link
+    rel="apple-touch-icon"
+    href='/apple-touch-icon.png'
+/>
+
+    <link
+        rel="icon"
+        href='/logo2.png'
+        type="image/svg+xml"
+    />
+
+<title>
+        
+            Intigriti 0125 XSS Challenge  &ndash;
+        
+        Alfin&#39;s Notes
+    </title>
+
+    
+    <link href="/symbols-nerd-font/symbols-nerd-font.css" rel="stylesheet" />
+    <link href="/jetbrains-mono/jetbrains-mono.css" rel="stylesheet" />
+
+    
+        <link rel="stylesheet" href="https://latest.cactus.chat/style.css" type="text/css">
+    
+    
+    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.abbd6311bb4b6ca58f8e7398140529245ae0f6428b759fcd830742eee2619eabb900ba9914a9affb82aa9a16a9b9ea727bb315315a976a0db0e7513a5f12c504.css integrity="sha512-q71jEbtLbKWPjnOYFAUpJFrg9kKLdZ/NgwdC7uJhnqu5ALqZFKmv&#43;4Kqmhapuepye7MVMVqXag2w51E6XxLFBA==" />
+<meta name="author" content="Gabriele Musco" />
+
+    
+    
+        <meta name="description" content="rong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Abusing URL parsing implemented using Regex .&lt;/li&gt;
+&lt;li&gt;Bypassing filters to using Path Normalization .&lt;/li&gt;
+&lt;li&gt;Finally XSS !!.&lt;/li&gt;
+&lt;/ul&gt;" />
+    
+
+<meta property="og:site_name"
+    content='Alfin&#39;s Notes' />
+
+    <meta property="og:title" content="Intigriti 0125 XSS Challenge" />
+    <meta property="og:type" content="article" />
+    
+    <meta
+        property="article:author" content="Gabriele Musco" />
+    <meta
+        property="article:published_time"
+        content='2025-01-19T21:26:29Z&#43;0530' />
+    
+    <meta property="og:url" content="http://example.org/posts/intigriti-0125/" />
+    
+    
+    <meta property="og:image"
+        content="http://example.org/icon512.png" />
+    
+        <meta property="og:description" content="&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Abusing URL parsing implemented using Regex .&lt;/li&gt;
+&lt;li&gt;Bypassing filters to using Path Normalization .&lt;/li&gt;
+&lt;li&gt;Finally X" />
+    
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:domain"
+      content='example.org'
+/>
+<meta property="twitter:url" content="http://example.org/posts/intigriti-0125/" />
+
+
+    <meta name="twitter:title" content="Intigriti 0125 XSS Challenge" />
+    
+    
+    
+    <meta name="twitter:image"
+        content="http://example.org/icon512.png" />
+    
+        <meta name="twitter:description" content="&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Abusing URL parsing implemented using Regex .&lt;/li&gt;
+&lt;li&gt;Bypassing filters to using Path Normalization .&lt;/li&gt;
+&lt;li&gt;Finally X" />
+    
+
+<link rel="manifest" href="/manifest/index.json" />
+</head>
+
+
+<body>
+        <div id="baseContainer"><header class="">
+<div class="titleAndSearchContainer">
+        <div id="titleContainer">
+            
+                <a class="unstyledLink" href="/">
+                    <img src='/logo2.png' alt='Logo'/>
+                </a>
+            
+            <div class="rightOfLogo">
+                <div class="titleAndHamburger">
+                    <h1>
+                        <a class="unstyledLink" href="/">Alfin&#39;s Notes</a>
+                        
+                    </h1>
+                    
+                </div>
+                <div id="wide_nav"><nav>
+    
+    <ul id="main-nav">
+        <li><a href="/">Home</a></li>
+        
+            <li><a href="/posts/">Posts</a></li>
+        
+        
+        
+        
+        
+            <li><a href="http://example.org/pages/about/">
+                About
+            </a></li>
+        
+        
+        
+            <li><a href="/tags/">Tags</a></li>
+        
+        
+    </ul>
+</nav>
+</div>
+            </div>
+        </div>
+        <div class="search">
+    <input id="searchbar" type="text" placeholder='Search' />
+    <span class="nerdlink" onclick="newSearch();">&#xf002;</span>
+</div>
+<script>
+    function newSearch() {
+        let term = searchbar.value.trim();
+        if (!term) return;
+        location.href = `/search/?q=${term}`;
+    }
+    searchbar.onkeyup = (ev) => {if (ev.keyCode == 13) newSearch()};
+</script>
+
+    </div>
+    <div id="links">
+        <a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="/index.xml">
+    
+    
+        &#xf09e;
+    
+    <span>
+        RSS
+    </span>
+</a>
+
+        
+        <a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="https://gitlab.com/gabmus">
+    
+    
+        &#xf296;
+    
+    <span>
+        GitLab
+    </span>
+</a>
+<a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="https://gitlab.gnome.org/gabmus">
+    
+    
+        &#xf361;
+    
+    <span>
+        GNOME GitLab
+    </span>
+</a>
+
+    </div>
+    
+
+</header>
+<div id="contentContainer">
+                <div id="content">
+                    <main>
+<article class="card single">
+    
+        <h1>Intigriti 0125 XSS Challenge</h1>
+    
+    
+        <p class="date">
+            <span title='Date'>󰃭 </span>
+    2025-01-19
+
+
+        </p>
+    
+    
+    
+    
+    <div><p><strong>tl;dr</strong></p>
+<ul>
+<li>Abusing URL parsing implemented using Regex .</li>
+<li>Bypassing filters to using Path Normalization .</li>
+<li>Finally XSS !!.</li>
+</ul>
+<p>Intigriti dropped another Interesting XSS challenge,This time created by <a href="https://x.com/0xGodson_">0xGodson_</a> .</p>
+<h2 id="-challenge-overview">🔎 Challenge Overview</h2>
+<p>The challenge is straightforward: it provides an input text box where we can enter our input, and it displays the output accordingly.</p>
+<p>There is no server-side component to this challenge, all functionality is handled entirely on the client-side JavaScript my favorite kind of challenge!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">function</span> XSS() {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#8be9fd;font-style:italic">decodeURIComponent</span>(<span style="color:#8be9fd;font-style:italic">window</span>.location.search).includes(<span style="color:#f1fa8c">&#39;&lt;&#39;</span>) <span style="color:#ff79c6">||</span> <span style="color:#8be9fd;font-style:italic">decodeURIComponent</span>(<span style="color:#8be9fd;font-style:italic">window</span>.location.search).includes(<span style="color:#f1fa8c">&#39;&gt;&#39;</span>) <span style="color:#ff79c6">||</span> <span style="color:#8be9fd;font-style:italic">decodeURIComponent</span>(<span style="color:#8be9fd;font-style:italic">window</span>.location.hash).includes(<span style="color:#f1fa8c">&#39;&lt;&#39;</span>) <span style="color:#ff79c6">||</span> <span style="color:#8be9fd;font-style:italic">decodeURIComponent</span>(<span style="color:#8be9fd;font-style:italic">window</span>.location.hash).includes(<span style="color:#f1fa8c">&#39;&gt;&#39;</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">function</span> getParameterByName(name) {
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">var</span> url <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">window</span>.location.href;
+</span></span><span style="display:flex;"><span>            name <span style="color:#ff79c6">=</span> name.replace(<span style="color:#f1fa8c">/[\[\]]/g</span>, <span style="color:#f1fa8c">&#34;\\$&amp;&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">var</span> regex <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">RegExp</span>(<span style="color:#f1fa8c">&#34;[?&amp;]&#34;</span> <span style="color:#ff79c6">+</span> name <span style="color:#ff79c6">+</span> <span style="color:#f1fa8c">&#34;(=([^&amp;#]*)|&amp;|#|$)&#34;</span>);
+</span></span><span style="display:flex;"><span>            results <span style="color:#ff79c6">=</span> regex.exec(url);
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>results) <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">null</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>results[<span style="color:#bd93f9">2</span>]) <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#39;&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#8be9fd;font-style:italic">decodeURIComponent</span>(results[<span style="color:#bd93f9">2</span>].replace(<span style="color:#f1fa8c">/\+/g</span>, <span style="color:#f1fa8c">&#34; &#34;</span>));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Function to redirect on form submit
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#8be9fd;font-style:italic">function</span> redirectToText(event) {
+</span></span><span style="display:flex;"><span>            event.preventDefault();
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> inputBox <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#39;inputBox&#39;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> text <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">encodeURIComponent</span>(inputBox.value);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">window</span>.location.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">`/challenge?text=</span><span style="color:#f1fa8c">${</span>text<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Function to display modal if &#39;text&#39; query param exists
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#8be9fd;font-style:italic">function</span> checkQueryParam() {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> text <span style="color:#ff79c6">=</span> getParameterByName(<span style="color:#f1fa8c">&#39;text&#39;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> (text <span style="color:#ff79c6">&amp;&amp;</span> XSS() <span style="color:#ff79c6">===</span> <span style="color:#ff79c6">false</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">const</span> modal <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#39;modal&#39;</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">const</span> modalText <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#39;modalText&#39;</span>);
+</span></span><span style="display:flex;"><span>                modalText.innerHTML <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">`Welcome, </span><span style="color:#f1fa8c">${</span>text<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">!`</span>;
+</span></span><span style="display:flex;"><span>                textForm.remove()
+</span></span><span style="display:flex;"><span>                modal.style.display <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;flex&#39;</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>     <span style="color:#8be9fd;font-style:italic">window</span>.onload <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">function</span> () {
+</span></span><span style="display:flex;"><span>                generateFallingParticles();
+</span></span><span style="display:flex;"><span>                checkQueryParam();
+</span></span><span style="display:flex;"><span>            };
+</span></span></code></pre></div><p>Examining the code, we can see that our input is stored in the <strong>text</strong> variable and eventually ends up in the <strong>innerHTML</strong> sink, suggesting an easy XSS. However, we need to make the <strong>XSS()</strong> function return <strong>true</strong>.</p>
+<p>The <strong>XSS()</strong> function checks for <strong>&lt;</strong> and <strong>&gt;</strong> characters in the <strong>window.location.search</strong> and <strong>window.location.hash</strong> parts of the URL. This means that if we input <strong>?text=&lt;img src=x onerror=alert()&gt;</strong>, it will be blocked because <strong>window.location.search</strong> contains <strong>&lt;</strong> and <strong>&gt;</strong>.</p>
+<p><img src="https://hackmd.io/_uploads/B1kLj9qwkx.png" alt="image"></p>
+<h2 id="-attack-plan">🥷 Attack plan</h2>
+<p>Looking at how the <strong>text</strong> parameter is being parsed in the <strong>getParameterByName()</strong> function, we can see that it is being parsed using a Regex that checks for a match in the entire URL.</p>
+<p>As you can see, the <strong>XSS()</strong> check for starting <strong>&lt;</strong> and closing <strong>&gt;</strong> occurs on <strong>window.location.search</strong> and <strong>window.location.hash</strong>, but the URL parameter <strong>text</strong> is being parsed using Regex from <strong>window.location.href</strong>, which contains the entire URL.</p>
+<p>So if we manage to sneak in our payload somewhere other than the search part or the hash part of the URL, it will be parsed by the Regex and will end up in the innerHTML sink.</p>
+<p>What if we give it in the path part of the URL?!</p>
+<p>Like this:  <code>https://challenge-0125.intigriti.io/&amp;text=&lt;payload&gt;/../challenge</code></p>
+<p>Here, the Regex will parse it, and the search part and hash part of the URL are empty and don&rsquo;t contain starting <strong>&lt;</strong> and closing <strong>&gt;</strong>, so the payload will reach the innerHTML sink and pop <code>alert()</code>.</p>
+<p>Make sure to URL encode the <strong>/</strong> !!</p>
+<h2 id="--final-payloads">🚀  Final Payloads</h2>
+<p><strong><a href="https://challenge-0125.intigriti.io/&amp;text=%3Cimg%20src=x%20onerror=alert()%3E%2f../challenge">https://challenge-0125.intigriti.io/&amp;text=%3Cimg%20src=x%20onerror=alert()%3E%2f../challenge</a></strong></p>
+<h2 id="-exploit-">💀 Exploit !!</h2>
+<p><img src="https://hackmd.io/_uploads/By0cyicvyl.png" alt="image"></p></div>
+</article>
+
+
+
+    <script
+        defer
+        src="https://example.com/js/commento.js"
+        data-no-fonts="true"
+    ></script>
+    <div id="commento"></div>
+
+
+<script type="text/javascript" src="https://latest.cactus.chat/cactus.js"></script>
+
+<div id="ficurinia-cactus-comments"></div>
+
+<script>
+initComments({
+    node: document.getElementById("ficurinia-cactus-comments"),
+    defaultHomeserverUrl: 'https:\/\/matrix.cactus.chat:8448',
+    serverName: 'cactus.chat',
+    siteName: "example.com",
+    commentSectionId: "eacbffc015cc7bf871b5b898ff2dc4ba"
+})
+</script>
+
+
+
+                    </main><footer>
+    <hr />
+
+<p><small>
+        2025 &copy; Some copyright notice - <a href="https://example.com/license">my license</a>
+    </small></p>
+    <p><small>
+        <a href='https://gitlab.com/gabmus/hugo-ficurinia'>Ficurinia theme</a> for <a href='https://gohugo.io'>Hugo</a> by <a href='https://gabmus.org'>Gabriele Musco</a>. Licensed under <a href='https://www.gnu.org/licenses/agpl-3.0.html'>GNU AGPLv3</a>.
+    </small></p>
+</footer>
+</div>
+            </div>
+        </div>
+    
+        <script
+            async
+            defer
+            data-domain="example.com"
+            src="https://something.com/..."
+        ></script>
+    
+
+
+    
+        <script
+            async
+            defer
+            data-website-id="example-tracking-code"
+            src="https://something.com/..."
+        ></script>
+    
+
+
+</body>
+</html>

