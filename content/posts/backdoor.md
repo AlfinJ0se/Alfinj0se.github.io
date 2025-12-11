@@ -1,5 +1,5 @@
 ---
-title: "go touch grass xsleaks Backoor CTF"
+title: "XSLeaks Backdoor CTF"
 date: 2025-01-19T21:26:29+05:30
 draft: false
 ---
@@ -15,7 +15,7 @@ draft: false
 
 The challenge gives a very straightforward HTML injection on the `note` parameter.
 
-```python
+```html
 template = """<!DOCTYPE html>
 <html>
 <head>
