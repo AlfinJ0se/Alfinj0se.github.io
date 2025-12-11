@@ -5,6 +5,9 @@
     <loc>http://example.org/</loc>
     <lastmod>2025-01-19T21:26:29+05:30</lastmod>
   </url><url>
+    <loc>http://example.org/posts/backdoor/</loc>
+    <lastmod>2025-01-19T21:26:29+05:30</lastmod>
+  </url><url>
     <loc>http://example.org/posts/intigriti-0125/</loc>
     <lastmod>2025-01-19T21:26:29+05:30</lastmod>
   </url><url>
@@ -33,10 +36,6 @@
   </url><url>
     <loc>http://example.org/categories/</loc>
   </url><url>
-    <loc>http://example.org/manifest/index.json</loc>
-  </url><url>
     <loc>http://example.org/pages/</loc>
-  </url><url>
-    <loc>http://example.org/search/</loc>
   </url>
 </urlset>
