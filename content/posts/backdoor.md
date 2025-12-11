@@ -1,13 +1,15 @@
 ---
-title: "Backdoor CTF - go touch grass"
+title: "go touch grass xsleaks Backoor CTF"
 date: 2025-01-19T21:26:29+05:30
 draft: false
 ---
 
 **tl;dr**
 
-* Scroll to text fragment to detect flag  
+* Scroll to text fragment XSleak to detect flag  
 * Exfiltrate characters using link tag dns-prefetch 
+* leak flag char by char
+<!--more-->
 
 ## 🔎 Challenge Overview
 
