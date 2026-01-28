@@ -1,1 +1,37 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml"><url><loc>http://example.org/</loc><lastmod>2025-01-19T21:26:29+05:30</lastmod></url><url><loc>http://example.org/posts/intigriti-0125/</loc><lastmod>2025-01-19T21:26:29+05:30</lastmod></url><url><loc>http://example.org/posts/</loc><lastmod>2025-01-19T21:26:29+05:30</lastmod></url><url><loc>http://example.org/posts/backdoor/</loc><lastmod>2025-01-19T21:26:29+05:30</lastmod></url><url><loc>http://example.org/posts/intigriti-0824/</loc><lastmod>2025-01-05T10:17:19+05:30</lastmod></url><url><loc>http://example.org/posts/intigriti-0724/</loc><lastmod>2024-06-06T21:00:26+05:30</lastmod></url><url><loc>http://example.org/posts/angstrom/</loc><lastmod>2024-05-26T21:01:42+05:30</lastmod></url><url><loc>http://example.org/posts/hacklu/</loc><lastmod>2024-05-26T13:07:55+05:30</lastmod></url><url><loc>http://example.org/pages/about/</loc></url><url><loc>http://example.org/pages/</loc></url></urlset>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>http://localhost/posts/intigriti-0125/</loc>
+    <lastmod>2025-01-19T21:26:29+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/posts/</loc>
+    <lastmod>2025-01-19T21:26:29+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/</loc>
+    <lastmod>2025-01-19T21:26:29+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/posts/intigriti-0824/</loc>
+    <lastmod>2025-01-05T10:17:19+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/posts/intigriti-0724/</loc>
+    <lastmod>2024-06-06T21:00:26+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/posts/angstrom/</loc>
+    <lastmod>2024-05-26T21:01:42+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/posts/hacklu/</loc>
+    <lastmod>2024-05-26T13:07:55+05:30</lastmod>
+  </url>
+  <url>
+    <loc>http://localhost/about/</loc>
+    <lastmod>2022-06-13T20:55:37+01:00</lastmod>
+  </url>
+</urlset>

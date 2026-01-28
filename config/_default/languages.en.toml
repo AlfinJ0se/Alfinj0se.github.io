@@ -1,0 +1,11 @@
+languageCode = "en"
+languageName = "English"
+weight = 1
+title = "Alfins Notes"
+
+[params]
+  displayName = "English"
+  isoCode = "en"
+  rtl = false
+  dateFormat = "2006-01"
+  description = "N9O | Nuno Coração"

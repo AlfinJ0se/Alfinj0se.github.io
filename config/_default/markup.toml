@@ -1,0 +1,12 @@
+[markup]
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNos = false
+    lineNumbersInTable = false
+    tabWidth = 4
+    style = "dracula"
+  [markup.tableOfContents]
+    endLevel = 5
+    ordered = false
+    startLevel = 1

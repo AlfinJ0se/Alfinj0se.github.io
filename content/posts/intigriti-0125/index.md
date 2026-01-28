@@ -2,6 +2,7 @@
 title: "Intigriti 0125 XSS Challenge"
 date: 2025-01-19T21:26:29+05:30
 draft: false
+tags: ['writeups']
 ---
 
 
@@ -70,7 +71,7 @@ Examining the code, we can see that our input is stored in the **text** variable
 The **XSS()** function checks for **<** and **>** characters in the **window.location.search** and **window.location.hash** parts of the URL. This means that if we input **?text=\<img src=x onerror=alert()>**, it will be blocked because **window.location.search** contains **<** and **>**.
 
 
-![image](https://hackmd.io/_uploads/B1kLj9qwkx.png)
+![image](img2.png)
 
 ## 🥷 Attack plan
 
@@ -94,6 +95,6 @@ Make sure to URL encode the **/** !!
 
 ## 💀 Exploit !!
 
-![image](https://hackmd.io/_uploads/By0cyicvyl.png)
+![image](img3.png)
 
 

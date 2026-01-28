@@ -1,0 +1,17 @@
+baseURL = 'http://localhost/'
+languageCode = 'en-us'
+title = "Alfin's Notes"
+theme = "blowfish"
+
+defaultContentLanguage = "en"
+summaryLength = 70
+
+# Recommended for Blowfish shortcodes
+enableInlineShortcodes = true
+
+[pagination]
+  pagerSize = 10
+
+# Keep JSON output for search index compatibility
+[outputs]
+  home = ["HTML", "JSON"]
