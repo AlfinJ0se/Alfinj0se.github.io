@@ -1,55 +1,31 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on Alfin&#39;s Notes</title>
-    <link>http://example.org/posts/</link>
-    <description>Recent content in Posts on Alfin&#39;s Notes</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <copyright>Some copyright notice - [my license](https://example.com/license)</copyright>
-    <lastBuildDate>Sun, 19 Jan 2025 21:26:29 +0530</lastBuildDate>
-    <atom:link href="http://example.org/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Backdoor CTF - go touch grass</title>
-      <link>http://example.org/posts/backdoor/</link>
-      <pubDate>Sun, 19 Jan 2025 21:26:29 +0530</pubDate>
-      <guid>http://example.org/posts/backdoor/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Scroll to text fragment to detect flag&lt;/li&gt;&#xA;&lt;li&gt;Exfiltrate characters using link tag dns-prefetch&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;-challenge-overview&#34;&gt;🔎 Challenge Overview&lt;/h2&gt;&#xA;&lt;p&gt;The challenge gives a very straightforward HTML injection on the &lt;code&gt;note&lt;/code&gt; parameter.&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;template &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&amp;lt;!DOCTYPE html&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;html&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;head&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;/head&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;body&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    &amp;lt;div class=&amp;#34;head&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    {&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;% i&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;f flag %}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;        &amp;lt;div class=&amp;#34;flag&amp;#34;&amp;gt;&amp;lt;h1&amp;gt;{{ flag }}&amp;lt;/h1&amp;gt;&amp;lt;/div&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    {&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;% e&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;ndif %}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    {&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;% i&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;f note %}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;        &amp;lt;div class=&amp;#34;note&amp;#34;&amp;gt;{{ note | safe}}&amp;lt;/div&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    {&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;% e&lt;/span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;ndif %}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    &amp;lt;script nonce=&amp;#34;{{ nonce }}&amp;#34;&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;        Array.from(document.getElementsByClassName(&amp;#39;flag&amp;#39;)).forEach(function(element) {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;            let text = element.innerText;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;            element.innerHTML = &amp;#39;&amp;#39;;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;            for (let i = 0; i &amp;lt; text.length; i++) {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;                let charElem = document.createElement(&amp;#39;span&amp;#39;);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;                charElem.innerText = text[i];&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;                element.appendChild(charElem);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;            }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;        });&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;    &amp;lt;/script&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;/body&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;lt;/html&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Examining the code, we can see that our input in the &lt;code&gt;note&lt;/code&gt; parameter is being sanitized by a server-side HTML sanitizer, so we can&amp;rsquo;t get a quick XSS and steal the flag sadly.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Intigriti 0125 XSS Challenge</title>
-      <link>http://example.org/posts/intigriti-0125/</link>
-      <pubDate>Sun, 19 Jan 2025 21:26:29 +0530</pubDate>
-      <guid>http://example.org/posts/intigriti-0125/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Abusing URL parsing implemented using Regex .&lt;/li&gt;&#xA;&lt;li&gt;Bypassing filters to using Path Normalization .&lt;/li&gt;&#xA;&lt;li&gt;Finally XSS !!.&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>Intigriti 0824 XSS Challenge</title>
-      <link>http://example.org/posts/intigriti-0824/</link>
-      <pubDate>Sun, 05 Jan 2025 10:17:19 +0530</pubDate>
-      <guid>http://example.org/posts/intigriti-0824/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Bypassing CSPT filters and UUID validations implemented using Regex .&lt;/li&gt;&#xA;&lt;li&gt;Chaining CSPT and Open-Redirect to achieve XSS .&lt;/li&gt;&#xA;&lt;li&gt;Finally XSS and retrive the admin cookie .&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>Intigriti 0724 XSS Challenge</title>
-      <link>http://example.org/posts/intigriti-0724/</link>
-      <pubDate>Thu, 06 Jun 2024 21:00:26 +0530</pubDate>
-      <guid>http://example.org/posts/intigriti-0724/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Dom clobbering to clobber isDevelopmet&lt;/li&gt;&#xA;&lt;li&gt;Throwing an error using RPO to prevent Dompurify from loading&lt;/li&gt;&#xA;&lt;li&gt;Using base tag&amp;rsquo;s to import our evil.js&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>WaterMark as a Service AngstromCTF</title>
-      <link>http://example.org/posts/angstrom/</link>
-      <pubDate>Sun, 26 May 2024 21:01:42 +0530</pubDate>
-      <guid>http://example.org/posts/angstrom/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;XS-search 200 / 404 .&lt;/li&gt;&#xA;&lt;li&gt;Leaking using HTML injection in a same-site challenge.&lt;/li&gt;&#xA;&lt;li&gt;Link tags and Error events .&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>päääd - Hack.lu CTF 2023 </title>
-      <link>http://example.org/posts/hacklu/</link>
-      <pubDate>Sun, 26 May 2024 13:07:55 +0530</pubDate>
-      <guid>http://example.org/posts/hacklu/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;meta redirect to attacker website, using the html injection in the paaad.&lt;/li&gt;&#xA;&lt;li&gt;leak the unique subdomain with csp violation.&lt;/li&gt;&#xA;&lt;li&gt;Another meta redirect csrf with the leaked subdomain to make the note public.&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Alfin's Notes</title><link>http://example.org/posts/</link><description>Recent content in Posts on Alfin's Notes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2026</copyright><lastBuildDate>Sun, 19 Jan 2025 21:26:29 +0530</lastBuildDate><atom:link href="http://example.org/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Intigriti 0125 XSS Challenge</title><link>http://example.org/posts/intigriti-0125/</link><pubDate>Sun, 19 Jan 2025 21:26:29 +0530</pubDate><guid>http://example.org/posts/intigriti-0125/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Abusing URL parsing implemented using Regex .&lt;/li>
+&lt;li>Bypassing filters to using Path Normalization .&lt;/li>
+&lt;li>Finally XSS !!.&lt;/li>
+&lt;/ul></description></item><item><title>XSLeaks Backdoor CTF</title><link>http://example.org/posts/backdoor/</link><pubDate>Sun, 19 Jan 2025 21:26:29 +0530</pubDate><guid>http://example.org/posts/backdoor/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Scroll to text fragment XSleak to detect flag&lt;/li>
+&lt;li>Exfiltrate characters using link tag dns-prefetch&lt;/li>
+&lt;li>leak flag char by char&lt;/li>
+&lt;/ul></description></item><item><title>Intigriti 0824 XSS Challenge</title><link>http://example.org/posts/intigriti-0824/</link><pubDate>Sun, 05 Jan 2025 10:17:19 +0530</pubDate><guid>http://example.org/posts/intigriti-0824/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Bypassing CSPT filters and UUID validations implemented using Regex .&lt;/li>
+&lt;li>Chaining CSPT and Open-Redirect to achieve XSS .&lt;/li>
+&lt;li>Finally XSS and retrive the admin cookie .&lt;/li>
+&lt;/ul></description></item><item><title>Intigriti 0724 XSS Challenge</title><link>http://example.org/posts/intigriti-0724/</link><pubDate>Thu, 06 Jun 2024 21:00:26 +0530</pubDate><guid>http://example.org/posts/intigriti-0724/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Dom clobbering to clobber isDevelopmet&lt;/li>
+&lt;li>Throwing an error using RPO to prevent Dompurify from loading&lt;/li>
+&lt;li>Using base tag&amp;rsquo;s to import our evil.js&lt;/li>
+&lt;/ul></description></item><item><title>WaterMark as a Service AngstromCTF</title><link>http://example.org/posts/angstrom/</link><pubDate>Sun, 26 May 2024 21:01:42 +0530</pubDate><guid>http://example.org/posts/angstrom/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>XS-search 200 / 404 .&lt;/li>
+&lt;li>Leaking using HTML injection in a same-site challenge.&lt;/li>
+&lt;li>Link tags and Error events .&lt;/li>
+&lt;/ul></description></item><item><title>päääd - Hack.lu CTF 2023</title><link>http://example.org/posts/hacklu/</link><pubDate>Sun, 26 May 2024 13:07:55 +0530</pubDate><guid>http://example.org/posts/hacklu/</guid><description>&lt;p>&lt;strong>tl;dr&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>meta redirect to attacker website, using the html injection in the paaad.&lt;/li>
+&lt;li>leak the unique subdomain with csp violation.&lt;/li>
+&lt;li>Another meta redirect csrf with the leaked subdomain to make the note public.&lt;/li>
+&lt;/ul></description></item></channel></rss>

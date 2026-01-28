@@ -1,19 +1,33 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Pages on Alfin&#39;s Notes</title>
-    <link>http://example.org/pages/</link>
-    <description>Recent content in Pages on Alfin&#39;s Notes</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <copyright>Some copyright notice - [my license](https://example.com/license)</copyright>
-    <atom:link href="http://example.org/pages/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>About</title>
-      <link>http://example.org/pages/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://example.org/pages/about/</guid>
-      <description>&lt;p&gt;Hey there , Im Alfin Joseph a.k.a alfin.&#xA;I am Currently doing my undergraduate in Computer Science and Engineering from Amrita Vishwa Vidyapeetham, India. 🇮🇳&lt;/p&gt;&#xA;&lt;h1 id=&#34;my-interests-&#34;&gt;My Interests 🎯&lt;/h1&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Security Engineer CRED&lt;/li&gt;&#xA;&lt;li&gt;Web security researcher and CTF player.&lt;/li&gt;&#xA;&lt;li&gt;My focus has been mainly on client-side vulnerabilities.&lt;/li&gt;&#xA;&lt;li&gt;Currently doing research and CTF&amp;rsquo;s with bi0s and Project Sekai.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h1 id=&#34;security-advisories&#34;&gt;Security Advisories&lt;/h1&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://nvd.nist.gov/vuln/detail/CVE-2023-52555&#34;&gt;CVE-2023-52555&lt;/a&gt;  Discovered a Cross-Site Request Forgery(CSRF) in Mongo-Express .&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://nvd.nist.gov/vuln/detail/CVE-2023-52555&#34;&gt;CVE-2025-00192&lt;/a&gt;    Discovered a Medium Severity XSS vulnerability in OpenUI .&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://nvd.nist.gov/vuln/detail/CVE-2023-52555&#34;&gt;CVE-2025-00660&lt;/a&gt;    Discovered a Stored XSS vulnerability in Concrete CMS .&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
-    </item>
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pages on Alfin's Notes</title><link>http://example.org/pages/</link><description>Recent content in Pages on Alfin's Notes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2026</copyright><atom:link href="http://example.org/pages/index.xml" rel="self" type="application/rss+xml"/><item><title>About</title><link>http://example.org/pages/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>http://example.org/pages/about/</guid><description>&lt;p>Hey there , Im Alfin Joseph a.k.a alfin.
+I am Currently doing my undergraduate in Computer Science and Engineering from Amrita Vishwa Vidyapeetham, India. 🇮🇳&lt;/p>
+
+&lt;h1 class="relative group">My Interests 🎯
+ &lt;div id="my-interests-" class="anchor">&lt;/div>
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#my-interests-" aria-label="Anchor">#&lt;/a>
+ &lt;/span>
+ 
+&lt;/h1>
+&lt;ul>
+&lt;li>Security Engineer CRED&lt;/li>
+&lt;li>Web security researcher and CTF player.&lt;/li>
+&lt;li>My focus has been mainly on client-side vulnerabilities.&lt;/li>
+&lt;li>Currently doing research and CTF&amp;rsquo;s with bi0s and Project Sekai.&lt;/li>
+&lt;/ul>
+
+&lt;h1 class="relative group">Security Advisories
+ &lt;div id="security-advisories" class="anchor">&lt;/div>
+ 
+ &lt;span
+ class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100 select-none">
+ &lt;a class="text-primary-300 dark:text-neutral-700 !no-underline" href="#security-advisories" aria-label="Anchor">#&lt;/a>
+ &lt;/span>
+ 
+&lt;/h1>
+&lt;ul>
+&lt;li>&lt;a href="https://nvd.nist.gov/vuln/detail/CVE-2023-52555" target="_blank" rel="noreferrer">CVE-2023-52555&lt;/a> Discovered a Cross-Site Request Forgery(CSRF) in Mongo-Express .&lt;/li>
+&lt;li>&lt;a href="https://nvd.nist.gov/vuln/detail/CVE-2023-52555" target="_blank" rel="noreferrer">CVE-2025-00192&lt;/a> Discovered a Medium Severity XSS vulnerability in OpenUI .&lt;/li>
+&lt;li>&lt;a href="https://nvd.nist.gov/vuln/detail/CVE-2023-52555" target="_blank" rel="noreferrer">CVE-2025-00660&lt;/a> Discovered a Stored XSS vulnerability in Concrete CMS .&lt;/li>
+&lt;/ul></description></item></channel></rss>
