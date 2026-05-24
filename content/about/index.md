@@ -16,5 +16,5 @@ I am Currently doing my undergraduate in Computer Science and Engineering from A
 
 # Security Advisories 
 - [CVE-2023-52555](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)  Discovered a Medium Severity CSRF in Mongo-Express .
-- [CVE-2025-00192](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)    Discovered a Medium Severity XSS vulnerability in OpenUI . 
-- [CVE-2025-00660](https://nvd.nist.gov/vuln/detail/CVE-2023-52555)    Discovered a Stored XSS vulnerability in Concrete CMS . 
+- [CVE-2025-00192](https://nvd.nist.gov/vuln/detail/CVE-2023-00192)    Discovered a Medium Severity XSS vulnerability in OpenUI . 
+- [CVE-2025-00660](https://nvd.nist.gov/vuln/detail/CVE-2023-00660)    Discovered a Stored XSS vulnerability in Concrete CMS . 
